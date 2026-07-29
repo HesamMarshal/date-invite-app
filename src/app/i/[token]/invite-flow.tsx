@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
 import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
-import DatePicker from "react-multi-date-picker";
+import DatePicker, { DateObject } from "react-multi-date-picker";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
@@ -55,6 +55,19 @@ function Btn({
   );
 }
 
+function roundToFiveMinutes(date: DateObject) {
+  const minutes = Math.round(date.minute / 5) * 5;
+  date.setMinute(minutes >= 60 ? 55 : minutes);
+  date.setSecond(0);
+  date.setMillisecond(0);
+  return date;
+}
+
+function applyTime(date: DateObject) {
+  const formatted = toAsciiDigits(date.format("HH:mm"));
+  return { date, formatted };
+}
+
 export default function InviteFlow({ token, name, existing }: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
@@ -62,6 +75,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
   const [dateLabel, setDateLabel] = useState("");
   const [time, setTime] = useState("");
   const [timeLabel, setTimeLabel] = useState("");
+  const [timeValue, setTimeValue] = useState<DateObject | null>(null);
   const [food, setFood] = useState<FoodChoice | "">("");
   const [error, setError] = useState("");
   const noLabels = [
@@ -230,7 +244,21 @@ export default function InviteFlow({ token, name, existing }: Props) {
               setDate(toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD")));
             }}
           />
-          <Btn onClick={() => date && setStep("time")} disabled={!date}>
+          <Btn
+            onClick={() => {
+              if (!date) return;
+              if (!timeValue) {
+                const { date: next, formatted } = applyTime(
+                  roundToFiveMinutes(new DateObject())
+                );
+                setTimeValue(next);
+                setTimeLabel(formatted);
+                setTime(formatted);
+              }
+              setStep("time");
+            }}
+            disabled={!date}
+          >
             بعدی ←
           </Btn>
         </div>
@@ -241,29 +269,33 @@ export default function InviteFlow({ token, name, existing }: Props) {
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">🕐</span>
           <h1 className="text-2xl font-bold">چه ساعتی؟</h1>
+          <p className="text-3xl font-bold tabular-nums text-pink-600 min-h-10">
+            {timeLabel || "––:––"}
+          </p>
           <DatePicker
             disableDayPicker
             format="HH:mm"
-            plugins={[<TimePicker key="time" hideSeconds mStep={5} />]}
-            value={timeLabel || undefined}
-            editable={false}
-            calendarPosition="bottom-center"
-            inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
-            containerClassName="w-full max-w-xs"
-            placeholder="یک ساعت انتخاب کن"
+            plugins={[
+              <TimePicker key="time" hideSeconds mStep={5} />,
+            ]}
+            value={timeValue}
             onChange={(value) => {
               if (!value || Array.isArray(value)) {
                 setTime("");
                 setTimeLabel("");
+                setTimeValue(null);
                 return;
               }
-              const formatted = toAsciiDigits(value.format("HH:mm"));
+              const { date: next, formatted } = applyTime(value as DateObject);
+              setTimeValue(next);
               setTimeLabel(formatted);
               setTime(formatted);
             }}
+            inline
+            containerClassName="rmdp-time-inline"
           />
           <Btn onClick={() => time && setStep("food")} disabled={!time}>
-            بعدی ←
+            تأیید ساعت ←
           </Btn>
         </div>
       )}
