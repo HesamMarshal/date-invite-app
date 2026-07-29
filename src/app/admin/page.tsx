@@ -1,10 +1,20 @@
 import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
 import CreateInvite from "./create-invite";
+import CopyButtonClient from "./copy-button";
+import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const invites = await getAllInvitationsWithResponses();
+  let invites: Awaited<ReturnType<typeof getAllInvitationsWithResponses>> = [];
+  let dbError = false;
+
+  try {
+    invites = await getAllInvitationsWithResponses();
+  } catch {
+    dbError = true;
+  }
+
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
 
@@ -12,11 +22,18 @@ export default async function AdminPage() {
     <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
+        <LogoutButton />
       </div>
+
+      {dbError && (
+        <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-600 text-center">
+          خطا در اتصال به دیتابیس. تنظیمات محیطی رو چک کن.
+        </div>
+      )}
 
       <CreateInvite appUrl={appUrl} />
 
-      {invites.length === 0 && (
+      {!dbError && invites.length === 0 && (
         <p className="text-zinc-400 text-center py-12">
           هنوز دعوت‌نامه‌ای ساخته نشده
         </p>
@@ -94,7 +111,7 @@ export default async function AdminPage() {
                   className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                   onClick={(e) => (e.target as HTMLInputElement).select()}
                 />
-                <CopyButton text={url} />
+                <CopyButtonClient text={url} />
               </div>
             </div>
           );
@@ -103,9 +120,3 @@ export default async function AdminPage() {
     </main>
   );
 }
-
-function CopyButton({ text }: { text: string }) {
-  return <CopyButtonClient text={text} />;
-}
-
-import CopyButtonClient from "./copy-button";
