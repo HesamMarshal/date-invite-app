@@ -27,6 +27,30 @@ type Step =
   | "goodbye"
   | "current";
 
+function Btn({
+  children,
+  variant = "primary",
+  disabled,
+  onClick,
+}: {
+  children: React.ReactNode;
+  variant?: "primary" | "secondary";
+  disabled?: boolean;
+  onClick?: () => void;
+}) {
+  const base =
+    "w-full max-w-xs rounded-full px-8 py-4 text-lg font-bold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 select-none";
+  const styles =
+    variant === "primary"
+      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:shadow-emerald-500/30"
+      : "bg-zinc-200 text-zinc-800 hover:bg-zinc-300";
+  return (
+    <button onClick={onClick} disabled={disabled} className={`${base} ${styles}`}>
+      {children}
+    </button>
+  );
+}
+
 export default function InviteFlow({ token, name, existing }: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
@@ -76,26 +100,28 @@ export default function InviteFlow({ token, name, existing }: Props) {
     }
   };
 
-  const wantToChange = () => {
-    setStep("ask");
-  };
-
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center min-h-screen">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center min-h-screen select-none">
       {/* ───── Current response (revisit) ───── */}
       {step === "current" && existing && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <p className="text-5xl">{existing.accepted ? "✅" : "❌"}</p>
-          <p className="text-xl font-bold">
+          <span className="text-6xl animate-float">
+            {existing.accepted ? "✅" : "😔"}
+          </span>
+          <h1 className="text-2xl font-bold leading-relaxed">
             {existing.accepted
               ? `${name}، قبلاً جواب دادی!`
               : `${name}، قبلاً رد کردی`}
-          </p>
+          </h1>
           {existing.accepted && existing.selectedDatetime && (
-            <div className="text-zinc-600 space-y-1">
+            <div className="rounded-2xl bg-white p-5 shadow-sm space-y-2 text-zinc-600 animate-scale-in">
               <p>
                 📅{" "}
-                {new Date(existing.selectedDatetime).toLocaleDateString("fa-IR")}
+                {new Date(existing.selectedDatetime).toLocaleDateString("fa-IR", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
               </p>
               <p>
                 🕐{" "}
@@ -107,35 +133,24 @@ export default function InviteFlow({ token, name, existing }: Props) {
               {existing.foodChoice && <p>🍽️ {existing.foodChoice}</p>}
             </div>
           )}
-          <button
-            onClick={wantToChange}
-            className="mt-4 rounded-full bg-zinc-200 px-6 py-3 text-sm transition hover:bg-zinc-300"
-          >
+          <Btn variant="secondary" onClick={() => setStep("ask")}>
             می‌خوام عوض کنم
-          </button>
+          </Btn>
         </div>
       )}
 
       {/* ───── Ask ───── */}
       {step === "ask" && (
         <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-6xl">👤</p>
-          <p className="text-2xl font-bold leading-relaxed">
+          <span className="text-7xl animate-float">👤</span>
+          <h1 className="text-2xl font-bold leading-relaxed">
             {name}، با من سر قرار میای؟
-          </p>
+          </h1>
           <div className="flex flex-col gap-4 w-full max-w-xs">
-            <button
-              onClick={() => setStep("date")}
-              className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 active:scale-95"
-            >
-              💚 بله
-            </button>
-            <button
-              onClick={handleNo}
-              className="rounded-full bg-zinc-200 px-8 py-4 text-lg font-bold transition hover:bg-zinc-300 active:scale-95"
-            >
+            <Btn onClick={() => setStep("date")}>💚 بله</Btn>
+            <Btn variant="secondary" onClick={handleNo}>
               🤍 نه
-            </button>
+            </Btn>
           </div>
         </div>
       )}
@@ -143,21 +158,13 @@ export default function InviteFlow({ token, name, existing }: Props) {
       {/* ───── Soft no 1 ───── */}
       {step === "soft-no-1" && (
         <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-6xl">🥺</p>
-          <p className="text-2xl font-bold">مطمئنی؟</p>
+          <span className="text-7xl animate-float">🥺</span>
+          <h1 className="text-2xl font-bold">مطمئنی؟</h1>
           <div className="flex flex-col gap-4 w-full max-w-xs">
-            <button
-              onClick={() => setStep("date")}
-              className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 active:scale-95"
-            >
-              🤔 بذار دوباره فکر کنم
-            </button>
-            <button
-              onClick={handleNo}
-              className="rounded-full bg-zinc-200 px-8 py-4 text-lg font-bold transition hover:bg-zinc-300 active:scale-95"
-            >
+            <Btn onClick={() => setStep("date")}>🤔 بذار دوباره فکر کنم</Btn>
+            <Btn variant="secondary" onClick={handleNo}>
               😅 آره مطمئنم
-            </button>
+            </Btn>
           </div>
         </div>
       )}
@@ -165,21 +172,13 @@ export default function InviteFlow({ token, name, existing }: Props) {
       {/* ───── Soft no 2 (final) ───── */}
       {step === "soft-no-2" && (
         <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-6xl">😢</p>
-          <p className="text-2xl font-bold">قول میدم خوش بگذره!</p>
+          <span className="text-7xl animate-float">😢</span>
+          <h1 className="text-2xl font-bold">قول میدم خوش بگذره!</h1>
           <div className="flex flex-col gap-4 w-full max-w-xs">
-            <button
-              onClick={() => setStep("date")}
-              className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 active:scale-95"
-            >
-              💚 باشه بله!
-            </button>
-            <button
-              onClick={() => submit(false)}
-              className="rounded-full bg-zinc-200 px-8 py-4 text-lg font-bold transition hover:bg-zinc-300 active:scale-95"
-            >
+            <Btn onClick={() => setStep("date")}>💚 باشه بله!</Btn>
+            <Btn variant="secondary" onClick={() => submit(false)}>
               🙈 واقعاً نه
-            </button>
+            </Btn>
           </div>
         </div>
       )}
@@ -187,88 +186,69 @@ export default function InviteFlow({ token, name, existing }: Props) {
       {/* ───── Date ───── */}
       {step === "date" && (
         <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-5xl">📅</p>
-          <p className="text-2xl font-bold">چه روزی؟</p>
+          <span className="text-6xl">📅</span>
+          <h1 className="text-2xl font-bold">چه روزی؟</h1>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           />
-          <button
-            onClick={() => {
-              if (!date) return;
-              setStep("time");
-            }}
-            disabled={!date}
-            className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 disabled:opacity-40 active:scale-95"
-          >
+          <Btn onClick={() => date && setStep("time")} disabled={!date}>
             بعدی ←
-          </button>
+          </Btn>
         </div>
       )}
 
       {/* ───── Time ───── */}
       {step === "time" && (
         <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <p className="text-5xl">🕐</p>
-          <p className="text-2xl font-bold">چه ساعتی؟</p>
+          <span className="text-6xl">🕐</span>
+          <h1 className="text-2xl font-bold">چه ساعتی؟</h1>
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           />
-          <button
-            onClick={() => {
-              if (!time) return;
-              setStep("food");
-            }}
-            disabled={!time}
-            className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 disabled:opacity-40 active:scale-95"
-          >
+          <Btn onClick={() => time && setStep("food")} disabled={!time}>
             بعدی ←
-          </button>
+          </Btn>
         </div>
       )}
 
       {/* ───── Food ───── */}
       {step === "food" && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <p className="text-5xl">🍽️</p>
-          <p className="text-2xl font-bold">چی دوست داری؟</p>
+          <span className="text-6xl">🍽️</span>
+          <h1 className="text-2xl font-bold">چی دوست داری؟</h1>
           <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
             {FOOD_OPTIONS.map((opt) => (
               <button
                 key={opt.label}
                 onClick={() => setFood(opt.label)}
-                className={`rounded-2xl border-2 px-4 py-4 text-base font-medium transition active:scale-95 ${
+                className={`rounded-2xl border-2 px-4 py-5 text-base font-medium transition-all duration-200 active:scale-[0.97] select-none ${
                   food === opt.label
-                    ? "border-emerald-500 bg-emerald-50"
+                    ? "border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-500/10"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
                 }`}
               >
-                <span className="text-2xl">{opt.emoji}</span>
-                <br />
+                <span className="text-3xl block mb-1">{opt.emoji}</span>
                 {opt.label}
               </button>
             ))}
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <button
-            onClick={() => submit(true)}
-            disabled={!food}
-            className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 disabled:opacity-40 active:scale-95"
-          >
+          <Btn onClick={() => submit(true)} disabled={!food}>
             ثبت قرار ✓
-          </button>
+          </Btn>
         </div>
       )}
 
       {/* ───── Submitting ───── */}
       {step === "submitting" && (
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <p className="text-5xl animate-bounce">⏳</p>
+          <span className="text-6xl animate-bounce">⏳</span>
           <p className="text-lg text-zinc-500">در حال ثبت...</p>
         </div>
       )}
@@ -276,10 +256,10 @@ export default function InviteFlow({ token, name, existing }: Props) {
       {/* ───── Thanks ───── */}
       {step === "thanks" && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <p className="text-6xl">🎉</p>
-          <p className="text-2xl font-bold">ممنون ❤️</p>
+          <span className="text-7xl animate-float">🎉</span>
+          <h1 className="text-2xl font-bold">ممنون ❤️</h1>
           <p className="text-lg text-zinc-600">قرارمون ثبت شد!</p>
-          <div className="mt-2 rounded-2xl bg-white p-6 shadow-sm space-y-2 text-zinc-700">
+          <div className="rounded-2xl bg-white p-6 shadow-sm space-y-3 text-zinc-700 animate-scale-in">
             <p>
               📅{" "}
               {new Date(date + "T" + time).toLocaleDateString("fa-IR", {
@@ -297,7 +277,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
               })}
             </p>
             <p>
-              🍽️ {FOOD_OPTIONS.find((o) => o.label === food)?.emoji} {food}
+              {FOOD_OPTIONS.find((o) => o.label === food)?.emoji} {food}
             </p>
           </div>
           <p className="text-sm text-zinc-400 mt-4">
@@ -309,9 +289,9 @@ export default function InviteFlow({ token, name, existing }: Props) {
       {/* ───── Goodbye ───── */}
       {step === "goodbye" && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <p className="text-6xl">😔</p>
-          <p className="text-2xl font-bold">باشه...</p>
-          <p className="text-lg text-zinc-600">
+          <span className="text-7xl animate-float">😔</span>
+          <h1 className="text-2xl font-bold">باشه...</h1>
+          <p className="text-lg text-zinc-600 leading-relaxed">
             ولی اگه نظرت عوض شد
             <br />
             همین لینک همیشه فعاله ❤️
