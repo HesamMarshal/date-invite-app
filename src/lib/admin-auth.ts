@@ -31,7 +31,7 @@ export async function setAdminCookie(): Promise<void> {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
-    path: "/admin",
+    path: "/",
     maxAge: 60 * 60 * 24,
   });
 }

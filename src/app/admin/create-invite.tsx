@@ -11,30 +11,39 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
   const [result, setResult] = useState<{ token: string; url: string } | null>(
     null
   );
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
+    setError("");
 
-    const res = await fetch("/api/admin/invite", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        recipientName: name.trim(),
-        expiresAt: expiresAt || null,
-      }),
-    });
+    try {
+      const res = await fetch("/api/admin/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName: name.trim(),
+          expiresAt: expiresAt || null,
+        }),
+      });
 
-    const data = await res.json();
-    setLoading(false);
+      const data = await res.json();
+      setLoading(false);
 
-    if (res.ok) {
-      setResult(data);
-      setName("");
-      setExpiresAt("");
-      router.refresh();
+      if (res.ok) {
+        setResult(data);
+        setName("");
+        setExpiresAt("");
+        router.refresh();
+      } else {
+        setError(data.error || "خطایی رخ داد");
+      }
+    } catch {
+      setLoading(false);
+      setError("ارتباط با سرور برقرار نشد");
     }
   };
 
@@ -90,6 +99,10 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
           </button>
         </div>
       </form>
+
+      {error && (
+        <p className="text-sm text-red-500 text-center">{error}</p>
+      )}
 
       {result && (
         <div className="rounded-xl bg-emerald-50 p-4 space-y-2">
