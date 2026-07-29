@@ -44,7 +44,7 @@ function Btn({
     "w-full max-w-xs rounded-full px-8 py-4 text-lg font-bold transition-all duration-200 active:scale-[0.97] disabled:opacity-40 disabled:active:scale-100 select-none";
   const styles =
     variant === "primary"
-      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:shadow-emerald-500/30"
+      ? "bg-pink-500 text-white shadow-lg shadow-pink-500/20 hover:bg-pink-600 hover:shadow-pink-500/30"
       : "bg-zinc-200 text-zinc-800 hover:bg-zinc-300";
   return (
     <button onClick={onClick} disabled={disabled} className={`${base} ${styles}`}>
@@ -153,7 +153,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setStep("date")}
-                className={`rounded-full bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:bg-emerald-600 active:scale-[0.97] ${
+                className={`rounded-full bg-pink-500 text-white font-bold shadow-lg shadow-pink-500/20 transition-all duration-300 hover:bg-pink-600 active:scale-[0.97] ${
                   noCount >= 4
                     ? "w-full px-8 py-5 text-xl"
                     : noCount === 3
@@ -208,7 +208,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
             value={dateLabel || undefined}
             editable={false}
             calendarPosition="bottom-center"
-            inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
             containerClassName="w-full max-w-xs"
             placeholder="یک تاریخ انتخاب کن"
             onChange={(value) => {
@@ -236,7 +236,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
           />
           <Btn onClick={() => time && setStep("food")} disabled={!time}>
             بعدی ←
@@ -256,7 +256,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
                 onClick={() => setFood(opt.label)}
                 className={`rounded-2xl border-2 px-4 py-5 text-base font-medium transition-all duration-200 active:scale-[0.97] select-none ${
                   food === opt.label
-                    ? "border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-500/10"
+                    ? "border-pink-500 bg-pink-50 shadow-sm shadow-pink-500/10"
                     : "border-zinc-200 bg-white hover:border-zinc-300"
                 }`}
               >

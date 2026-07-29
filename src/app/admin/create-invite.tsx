@@ -51,7 +51,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-2xl border-2 border-dashed border-zinc-300 px-6 py-4 text-zinc-500 transition hover:border-emerald-400 hover:text-emerald-600"
+        className="rounded-2xl border-2 border-dashed border-zinc-300 px-6 py-4 text-zinc-500 transition hover:border-pink-400 hover:text-pink-600"
       >
         + ساخت دعوت‌نامه جدید
       </button>
@@ -67,7 +67,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="اسم مهمون"
-          className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-emerald-500"
+          className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-pink-500"
           autoFocus
         />
         <div className="flex flex-col gap-1">
@@ -76,14 +76,14 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
             type="datetime-local"
             value={expiresAt}
             onChange={(e) => setExpiresAt(e.target.value)}
-            className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-emerald-500"
+            className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-pink-500"
           />
         </div>
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={loading || !name.trim()}
-            className="flex-1 rounded-full bg-emerald-500 px-6 py-3 text-white font-bold transition hover:bg-emerald-600 disabled:opacity-40"
+            className="flex-1 rounded-full bg-pink-500 px-6 py-3 text-white font-bold transition hover:bg-pink-600 disabled:opacity-40"
           >
             {loading ? "..." : "بساز"}
           </button>
@@ -105,12 +105,12 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
       )}
 
       {result && (
-        <div className="rounded-xl bg-emerald-50 p-4 space-y-2">
-          <p className="text-sm font-bold text-emerald-700">✓ ساخته شد!</p>
+        <div className="rounded-xl bg-pink-50 p-4 space-y-2">
+          <p className="text-sm font-bold text-pink-700">✓ ساخته شد!</p>
           <input
             readOnly
             value={result.url}
-            className="w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm outline-none"
+            className="w-full rounded-xl border border-pink-200 bg-white px-3 py-2 text-sm outline-none"
             onClick={(e) => (e.target as HTMLInputElement).select()}
           />
         </div>

@@ -39,14 +39,14 @@ export default function AdminLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="رمز عبور"
-          className="rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          className="rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
           autoFocus
         />
         {error && <p className="text-sm text-red-500 text-center">{error}</p>}
         <button
           type="submit"
           disabled={loading || !password}
-          className="rounded-full bg-emerald-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-emerald-600 disabled:opacity-40"
+          className="rounded-full bg-pink-500 px-8 py-4 text-lg font-bold text-white transition hover:bg-pink-600 disabled:opacity-40"
         >
           {loading ? "..." : "ورود"}
         </button>
