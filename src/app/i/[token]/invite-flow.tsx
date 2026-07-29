@@ -2,6 +2,10 @@
 
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persianFa from "react-date-object/locales/persian_fa";
+import gregorian from "react-date-object/calendars/gregorian";
 
 type Existing = {
   accepted: boolean;
@@ -55,6 +59,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
   const [date, setDate] = useState("");
+  const [dateLabel, setDateLabel] = useState("");
   const [time, setTime] = useState("");
   const [food, setFood] = useState<FoodChoice | "">("");
   const [error, setError] = useState("");
@@ -188,11 +193,24 @@ export default function InviteFlow({ token, name, existing }: Props) {
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">📅</span>
           <h1 className="text-2xl font-bold">چه روزی؟</h1>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          <DatePicker
+            calendar={persian}
+            locale={persianFa}
+            value={dateLabel || undefined}
+            editable={false}
+            calendarPosition="bottom-center"
+            inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            containerClassName="w-full max-w-xs"
+            placeholder="یک تاریخ انتخاب کن"
+            onChange={(value) => {
+              if (!value || Array.isArray(value)) {
+                setDate("");
+                setDateLabel("");
+                return;
+              }
+              setDateLabel(value.format("YYYY/MM/DD"));
+              setDate(value.convert(gregorian).format("YYYY-MM-DD"));
+            }}
           />
           <Btn onClick={() => date && setStep("time")} disabled={!date}>
             بعدی ←
@@ -261,13 +279,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
           <p className="text-lg text-zinc-600">قرارمون ثبت شد!</p>
           <div className="rounded-2xl bg-white p-6 shadow-sm space-y-3 text-zinc-700 animate-scale-in">
             <p>
-              📅{" "}
-              {new Date(date + "T" + time).toLocaleDateString("fa-IR", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              📅 {dateLabel}
             </p>
             <p>
               🕐{" "}
