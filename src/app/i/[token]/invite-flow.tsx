@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
 import DatePicker from "react-multi-date-picker";
+import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
@@ -59,6 +60,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
   const [date, setDate] = useState("");
   const [dateLabel, setDateLabel] = useState("");
   const [time, setTime] = useState("");
+  const [timeLabel, setTimeLabel] = useState("");
   const [food, setFood] = useState<FoodChoice | "">("");
   const [error, setError] = useState("");
   const noLabels = [
@@ -232,11 +234,26 @@ export default function InviteFlow({ token, name, existing }: Props) {
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">🕐</span>
           <h1 className="text-2xl font-bold">چه ساعتی؟</h1>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+          <DatePicker
+            disableDayPicker
+            format="HH:mm"
+            plugins={[<TimePicker key="time" hideSeconds mStep={5} />]}
+            value={timeLabel || undefined}
+            editable={false}
+            calendarPosition="bottom-center"
+            inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+            containerClassName="w-full max-w-xs"
+            placeholder="یک ساعت انتخاب کن"
+            onChange={(value) => {
+              if (!value || Array.isArray(value)) {
+                setTime("");
+                setTimeLabel("");
+                return;
+              }
+              const formatted = value.format("HH:mm");
+              setTimeLabel(formatted);
+              setTime(formatted);
+            }}
           />
           <Btn onClick={() => time && setStep("food")} disabled={!time}>
             بعدی ←
@@ -291,11 +308,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
               📅 {dateLabel}
             </p>
             <p>
-              🕐{" "}
-              {new Date(date + "T" + time).toLocaleTimeString("fa-IR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              🕐 {timeLabel}
             </p>
             <p>
               {FOOD_OPTIONS.find((o) => o.label === food)?.emoji} {food}
