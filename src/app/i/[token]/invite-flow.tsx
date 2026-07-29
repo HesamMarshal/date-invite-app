@@ -21,8 +21,6 @@ type Props = {
 
 type Step =
   | "ask"
-  | "soft-no-1"
-  | "soft-no-2"
   | "date"
   | "time"
   | "food"
@@ -63,6 +61,12 @@ export default function InviteFlow({ token, name, existing }: Props) {
   const [time, setTime] = useState("");
   const [food, setFood] = useState<FoodChoice | "">("");
   const [error, setError] = useState("");
+  const noLabels = [
+    "🤍 نه",
+    "😅 نه",
+    "🥺 نه",
+    "🙈 نه",
+  ] as const;
 
   const submit = useCallback(
     async (accepted: boolean) => {
@@ -96,13 +100,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
   );
 
   const handleNo = () => {
-    if (noCount === 0) {
-      setNoCount(1);
-      setStep("soft-no-1");
-    } else {
-      setNoCount(2);
-      setStep("soft-no-2");
-    }
+    setNoCount((count) => Math.min(count + 1, 4));
   };
 
   return (
@@ -151,39 +149,50 @@ export default function InviteFlow({ token, name, existing }: Props) {
           <h1 className="text-2xl font-bold leading-relaxed">
             {name}، با من سر قرار میای؟
           </h1>
-          <div className="flex flex-col gap-4 w-full max-w-xs">
-            <Btn onClick={() => setStep("date")}>💚 بله</Btn>
-            <Btn variant="secondary" onClick={handleNo}>
-              🤍 نه
-            </Btn>
-          </div>
-        </div>
-      )}
+          <div className="w-full max-w-sm">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setStep("date")}
+                className={`rounded-full bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:bg-emerald-600 active:scale-[0.97] ${
+                  noCount >= 4
+                    ? "w-full px-8 py-5 text-xl"
+                    : noCount === 3
+                      ? "flex-[1.75] px-8 py-5 text-xl"
+                      : noCount === 2
+                        ? "flex-[1.55] px-8 py-4 text-lg"
+                        : noCount === 1
+                          ? "flex-[1.3] px-7 py-4 text-lg"
+                          : "flex-1 px-8 py-4 text-lg"
+                }`}
+              >
+                {noCount >= 4 ? "💚 بلهههه" : "💚 بله"}
+              </button>
 
-      {/* ───── Soft no 1 ───── */}
-      {step === "soft-no-1" && (
-        <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <span className="text-7xl animate-float">🥺</span>
-          <h1 className="text-2xl font-bold">مطمئنی؟</h1>
-          <div className="flex flex-col gap-4 w-full max-w-xs">
-            <Btn onClick={() => setStep("date")}>🤔 بذار دوباره فکر کنم</Btn>
-            <Btn variant="secondary" onClick={handleNo}>
-              😅 آره مطمئنم
-            </Btn>
-          </div>
-        </div>
-      )}
+              {noCount < 4 && (
+                <button
+                  onClick={handleNo}
+                  className={`rounded-full bg-zinc-200 text-zinc-800 font-bold transition-all duration-300 hover:bg-zinc-300 active:scale-[0.97] ${
+                    noCount === 3
+                      ? "flex-[0.28] px-2 py-2 text-xs"
+                      : noCount === 2
+                        ? "flex-[0.42] px-3 py-2 text-sm"
+                        : noCount === 1
+                          ? "flex-[0.6] px-4 py-3 text-base"
+                          : "flex-1 px-8 py-4 text-lg"
+                  }`}
+                >
+                  {noLabels[noCount]}
+                </button>
+              )}
+            </div>
 
-      {/* ───── Soft no 2 (final) ───── */}
-      {step === "soft-no-2" && (
-        <div className="flex flex-col items-center gap-8 animate-fade-in">
-          <span className="text-7xl animate-float">😢</span>
-          <h1 className="text-2xl font-bold">قول میدم خوش بگذره!</h1>
-          <div className="flex flex-col gap-4 w-full max-w-xs">
-            <Btn onClick={() => setStep("date")}>💚 باشه بله!</Btn>
-            <Btn variant="secondary" onClick={() => submit(false)}>
-              🙈 واقعاً نه
-            </Btn>
+            <p className="mt-4 min-h-6 text-sm text-zinc-400">
+              {noCount === 0 && "فقط یکی رو انتخاب کن 😌"}
+              {noCount === 1 && "انگار دکمه نه یه کم خجالتی شد..."}
+              {noCount === 2 && "نه داره کوچیک تر میشه 😏"}
+              {noCount === 3 && "فکر کنم نه کم کم داره منصرف میشه"}
+              {noCount >= 4 && "دیگه فقط بله باقی موند 😎"}
+            </p>
           </div>
         </div>
       )}
