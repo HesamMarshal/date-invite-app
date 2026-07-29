@@ -71,6 +71,7 @@ input[type="datetime-local"] {
 }
 
 /* Inline time picker — hide calendar chrome, keep only clock wheels */
+.rmdp-time-inline.rmdp-calendar,
 .rmdp-time-inline .rmdp-calendar {
   box-shadow: none;
   border: 1px solid #fce7f3;

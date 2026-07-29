@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
 import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
-import DatePicker, { DateObject } from "react-multi-date-picker";
+import DatePicker, { Calendar, DateObject } from "react-multi-date-picker";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
@@ -272,7 +272,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
           <p className="text-3xl font-bold tabular-nums text-pink-600 min-h-10">
             {timeLabel || "––:––"}
           </p>
-          <DatePicker
+          <Calendar
             disableDayPicker
             format="HH:mm"
             plugins={[
@@ -291,8 +291,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
               setTimeLabel(formatted);
               setTime(formatted);
             }}
-            inline
-            containerClassName="rmdp-time-inline"
+            className="rmdp-time-inline"
           />
           <Btn onClick={() => time && setStep("food")} disabled={!time}>
             تأیید ساعت ←
