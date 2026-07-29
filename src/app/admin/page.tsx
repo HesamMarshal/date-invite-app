@@ -1,8 +1,111 @@
-export default function AdminPage() {
+import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
+import CreateInvite from "./create-invite";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const invites = await getAllInvitationsWithResponses();
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
+
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-      <p className="text-lg text-zinc-600">پنل مدیریت</p>
-      <p className="text-xs text-zinc-300">Admin UI coming in Phase 4</p>
+    <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
+      </div>
+
+      <CreateInvite appUrl={appUrl} />
+
+      {invites.length === 0 && (
+        <p className="text-zinc-400 text-center py-12">
+          هنوز دعوت‌نامه‌ای ساخته نشده
+        </p>
+      )}
+
+      <div className="flex flex-col gap-4">
+        {invites.map((inv) => {
+          const status =
+            inv.accepted === 1
+              ? "accepted"
+              : inv.accepted === 0
+                ? "rejected"
+                : inv.open_count > 0
+                  ? "opened"
+                  : "unseen";
+
+          const statusLabel = {
+            accepted: "✅ قبول کرده",
+            rejected: "❌ رد کرده",
+            opened: "👀 باز کرده",
+            unseen: "🔗 باز نکرده",
+          }[status];
+
+          const url = `${appUrl}/i/${inv.token}`;
+
+          return (
+            <div
+              key={inv.id}
+              className="rounded-2xl bg-white p-5 shadow-sm border border-zinc-100 space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-lg">{inv.recipient_name}</span>
+                <span className="text-sm">{statusLabel}</span>
+              </div>
+
+              {inv.open_count > 0 && (
+                <p className="text-xs text-zinc-400">
+                  {inv.open_count} بار باز شده
+                </p>
+              )}
+
+              {status === "accepted" && (
+                <div className="text-sm text-zinc-600 space-y-1">
+                  {inv.selected_datetime && (
+                    <>
+                      <p>
+                        📅{" "}
+                        {new Date(inv.selected_datetime).toLocaleDateString(
+                          "fa-IR",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p>
+                        🕐{" "}
+                        {new Date(inv.selected_datetime).toLocaleTimeString(
+                          "fa-IR",
+                          { hour: "2-digit", minute: "2-digit" }
+                        )}
+                      </p>
+                    </>
+                  )}
+                  {inv.food_choice && <p>🍽️ {inv.food_choice}</p>}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  readOnly
+                  value={url}
+                  className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <CopyButton text={url} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </main>
   );
 }
+
+function CopyButton({ text }: { text: string }) {
+  return <CopyButtonClient text={text} />;
+}
+
+import CopyButtonClient from "./copy-button";

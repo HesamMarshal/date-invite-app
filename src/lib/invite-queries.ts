@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { getPool } from "./db";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
@@ -71,4 +72,45 @@ export async function upsertResponse(
        updated_at = NOW()`,
     [invitationId, accepted ? 1 : 0, selectedDatetime, foodChoice]
   );
+}
+
+export interface InvitationWithResponse extends Invitation {
+  accepted: number | null;
+  selected_datetime: string | null;
+  food_choice: string | null;
+  response_updated_at: string | null;
+}
+
+export async function getAllInvitationsWithResponses(): Promise<
+  InvitationWithResponse[]
+> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT i.*,
+            r.accepted,
+            r.selected_datetime,
+            r.food_choice,
+            r.updated_at AS response_updated_at
+       FROM invitations i
+       LEFT JOIN responses r ON r.invitation_id = i.id
+      ORDER BY i.created_at DESC`
+  );
+  return rows as InvitationWithResponse[];
+}
+
+function generateToken(length = 16): string {
+  return crypto.randomBytes(length).toString("base64url").slice(0, length);
+}
+
+export async function createInvitation(
+  recipientName: string,
+  expiresAt: string | null
+): Promise<string> {
+  const pool = getPool();
+  const token = generateToken();
+  await pool.query<ResultSetHeader>(
+    `INSERT INTO invitations (token, recipient_name, expires_at) VALUES (?, ?, ?)`,
+    [token, recipientName, expiresAt || null]
+  );
+  return token;
 }
