@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
+import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
 import DatePicker from "react-multi-date-picker";
 import TimePicker from "react-multi-date-picker/plugins/time_picker";
 import persian from "react-date-object/calendars/persian";
@@ -76,7 +77,13 @@ export default function InviteFlow({ token, name, existing }: Props) {
       setError("");
 
       const selectedDatetime =
-        accepted && date && time ? `${date}T${time}:00` : null;
+        accepted && date && time ? buildSelectedDatetime(date, time) : null;
+
+      if (accepted && !selectedDatetime) {
+        setError(API_ERROR_FA.invalid_datetime);
+        setStep("food");
+        return;
+      }
 
       const res = await fetch("/api/respond", {
         method: "POST",
@@ -91,7 +98,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "خطایی رخ داد");
+        setError(API_ERROR_FA[data.error as string] || data.error || "خطایی رخ داد");
         setStep(accepted ? "food" : "ask");
         return;
       }
@@ -220,7 +227,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
                 return;
               }
               setDateLabel(value.format("YYYY/MM/DD"));
-              setDate(value.convert(gregorian).format("YYYY-MM-DD"));
+              setDate(toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD")));
             }}
           />
           <Btn onClick={() => date && setStep("time")} disabled={!date}>
@@ -250,7 +257,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
                 setTimeLabel("");
                 return;
               }
-              const formatted = value.format("HH:mm");
+              const formatted = toAsciiDigits(value.format("HH:mm"));
               setTimeLabel(formatted);
               setTime(formatted);
             }}

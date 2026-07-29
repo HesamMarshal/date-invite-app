@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getInvitationByToken, upsertResponse } from "@/lib/invite-queries";
 import { isValidFoodChoice } from "@/lib/food-options";
+import { isValidMysqlDatetime } from "@/lib/datetime";
 
 const RATE_LIMIT = new Map<string, number>();
 const RATE_WINDOW = 60_000;
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json({ error: "missing_fields" }, { status: 400 });
     }
-    if (isNaN(new Date(selectedDatetime).getTime())) {
+    if (!isValidMysqlDatetime(selectedDatetime)) {
       return NextResponse.json({ error: "invalid_datetime" }, { status: 400 });
     }
   }
