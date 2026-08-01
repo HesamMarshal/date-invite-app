@@ -2,13 +2,54 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persianFa from "react-date-object/locales/persian_fa";
+import gregorian from "react-date-object/calendars/gregorian";
 import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
+import { buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function TimeColumn({
+  value,
+  label,
+  onInc,
+  onDec,
+}: {
+  value: string;
+  label: string;
+  onInc: () => void;
+  onDec: () => void;
+}) {
+  const btn =
+    "flex h-10 w-12 items-center justify-center rounded-xl bg-pink-50 text-pink-600 text-sm font-bold transition active:scale-95 active:bg-pink-100";
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <button type="button" aria-label={`${label} بیشتر`} onClick={onInc} className={btn}>
+        ▲
+      </button>
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-pink-200 bg-white text-xl font-bold tabular-nums">
+        {value}
+      </div>
+      <button type="button" aria-label={`${label} کمتر`} onClick={onDec} className={btn}>
+        ▼
+      </button>
+      <span className="text-[10px] text-zinc-400">{label}</span>
+    </div>
+  );
+}
 
 export default function CreateInvite({ appUrl }: { appUrl: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [inviteText, setInviteText] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [expiryDateLabel, setExpiryDateLabel] = useState("");
+  const [hour, setHour] = useState(23);
+  const [minute, setMinute] = useState(55);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ token: string; url: string } | null>(
     null
@@ -16,11 +57,51 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const bumpHour = (delta: number) => {
+    setHour((h) => (h + delta + 24) % 24);
+  };
+
+  const bumpMinute = (delta: number) => {
+    const next = minute + delta * 5;
+    if (next >= 60) {
+      setMinute(0);
+      setHour((h) => (h + 1) % 24);
+      return;
+    }
+    if (next < 0) {
+      setMinute(55);
+      setHour((h) => (h + 23) % 24);
+      return;
+    }
+    setMinute(next);
+  };
+
+  const clearExpiry = () => {
+    setExpiryDate("");
+    setExpiryDateLabel("");
+    setHour(23);
+    setMinute(55);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setLoading(true);
     setError("");
+
+    let expiresAt: string | null = null;
+    if (expiryDate) {
+      const built = buildSelectedDatetime(
+        expiryDate,
+        `${pad2(hour)}:${pad2(minute)}`
+      );
+      if (!built) {
+        setLoading(false);
+        setError("تاریخ یا ساعت انقضا درست نیست");
+        return;
+      }
+      expiresAt = built;
+    }
 
     try {
       const res = await fetch("/api/admin/invite", {
@@ -29,7 +110,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
         body: JSON.stringify({
           recipientName: name.trim(),
           inviteText: inviteText.trim() || DEFAULT_INVITE_TEXT,
-          expiresAt: expiresAt || null,
+          expiresAt,
         }),
       });
 
@@ -40,7 +121,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
         setResult(data);
         setName("");
         setInviteText("");
-        setExpiresAt("");
+        clearExpiry();
         router.refresh();
       } else {
         setError(data.error || "خطایی رخ داد");
@@ -92,15 +173,70 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">تاریخ انقضا (اختیاری)</label>
-          <input
-            type="datetime-local"
-            value={expiresAt}
-            onChange={(e) => setExpiresAt(e.target.value)}
-            className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-pink-500"
+
+        <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-zinc-400">انقضا (اختیاری)</label>
+            {expiryDate && (
+              <button
+                type="button"
+                onClick={clearExpiry}
+                className="text-xs text-pink-600 hover:underline"
+              >
+                پاک کردن
+              </button>
+            )}
+          </div>
+
+          <DatePicker
+            calendar={persian}
+            locale={persianFa}
+            value={expiryDateLabel || undefined}
+            editable={false}
+            calendarPosition="bottom-center"
+            inputClass="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center outline-none focus:border-pink-500"
+            containerClassName="w-full"
+            placeholder="تاریخ انقضا"
+            onChange={(value) => {
+              if (!value || Array.isArray(value)) {
+                setExpiryDate("");
+                setExpiryDateLabel("");
+                return;
+              }
+              setExpiryDateLabel(value.format("YYYY/MM/DD"));
+              setExpiryDate(
+                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
+              );
+            }}
           />
+
+          {expiryDate && (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-lg font-bold tabular-nums text-pink-600">
+                {pad2(hour)}:{pad2(minute)}
+              </p>
+              <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3">
+                <TimeColumn
+                  value={pad2(hour)}
+                  label="ساعت"
+                  onInc={() => bumpHour(1)}
+                  onDec={() => bumpHour(-1)}
+                />
+                <span className="pb-5 text-2xl font-bold text-zinc-300">:</span>
+                <TimeColumn
+                  value={pad2(minute)}
+                  label="دقیقه"
+                  onInc={() => bumpMinute(1)}
+                  onDec={() => bumpMinute(-1)}
+                />
+              </div>
+              <p className="text-[11px] text-zinc-400">
+                {expiryDateLabel} — {pad2(hour)}:{pad2(minute)}
+              </p>
+            </div>
+          )}
         </div>
+
         <div className="flex gap-2">
           <button
             type="submit"

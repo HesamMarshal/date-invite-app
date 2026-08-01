@@ -116,3 +116,12 @@ export async function createInvitation(
   );
   return token;
 }
+
+export async function deleteInvitation(id: number): Promise<boolean> {
+  const pool = getPool();
+  const [result] = await pool.query<ResultSetHeader>(
+    "DELETE FROM invitations WHERE id = ?",
+    [id]
+  );
+  return result.affectedRows > 0;
+}

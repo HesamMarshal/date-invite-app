@@ -1,6 +1,7 @@
 import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
 import CreateInvite from "./create-invite";
 import CopyButtonClient from "./copy-button";
+import DeleteInviteButton from "./delete-invite-button";
 import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
@@ -115,6 +116,7 @@ export default async function AdminPage() {
                   className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                 />
                 <CopyButtonClient text={url} />
+                <DeleteInviteButton id={inv.id} name={inv.recipient_name} />
               </div>
             </div>
           );
