@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
 
 export default function CreateInvite({ appUrl }: { appUrl: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [inviteText, setInviteText] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ token: string; url: string } | null>(
@@ -26,6 +28,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recipientName: name.trim(),
+          inviteText: inviteText.trim() || DEFAULT_INVITE_TEXT,
           expiresAt: expiresAt || null,
         }),
       });
@@ -36,6 +39,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
       if (res.ok) {
         setResult(data);
         setName("");
+        setInviteText("");
         setExpiresAt("");
         router.refresh();
       } else {
@@ -69,7 +73,25 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
           placeholder="اسم مهمون"
           className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-pink-500"
           autoFocus
+          maxLength={100}
         />
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-zinc-400">متن دعوت (اختیاری)</label>
+          <input
+            type="text"
+            value={inviteText}
+            onChange={(e) => setInviteText(e.target.value)}
+            placeholder={DEFAULT_INVITE_TEXT}
+            className="rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 outline-none focus:border-pink-500"
+            maxLength={200}
+          />
+          {name.trim() && (
+            <p className="text-xs text-zinc-400 pt-1">
+              پیش‌نمایش: {name.trim()}،{" "}
+              {inviteText.trim() || DEFAULT_INVITE_TEXT}
+            </p>
+          )}
+        </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs text-zinc-400">تاریخ انقضا (اختیاری)</label>
           <input

@@ -6,6 +6,7 @@ export interface Invitation {
   id: number;
   token: string;
   recipient_name: string;
+  invite_text: string;
   opened_at: string | null;
   open_count: number;
   expires_at: string | null;
@@ -104,13 +105,14 @@ function generateToken(length = 16): string {
 
 export async function createInvitation(
   recipientName: string,
+  inviteText: string,
   expiresAt: string | null
 ): Promise<string> {
   const pool = getPool();
   const token = generateToken();
   await pool.query<ResultSetHeader>(
-    `INSERT INTO invitations (token, recipient_name, expires_at) VALUES (?, ?, ?)`,
-    [token, recipientName, expiresAt || null]
+    `INSERT INTO invitations (token, recipient_name, invite_text, expires_at) VALUES (?, ?, ?, ?)`,
+    [token, recipientName, inviteText, expiresAt || null]
   );
   return token;
 }

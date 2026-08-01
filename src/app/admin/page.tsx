@@ -69,6 +69,10 @@ export default async function AdminPage() {
                 <span className="text-sm">{statusLabel}</span>
               </div>
 
+              <p className="text-sm text-zinc-500">
+                {inv.recipient_name}، {inv.invite_text}
+              </p>
+
               {inv.open_count > 0 && (
                 <p className="text-xs text-zinc-400">
                   {inv.open_count} بار باز شده

@@ -37,6 +37,7 @@ export default async function InvitePage({ params }: Props) {
     <InviteFlow
       token={token}
       name={invite.recipient_name}
+      inviteText={invite.invite_text}
       existing={
         existing
           ? {

@@ -17,6 +17,7 @@ type Existing = {
 type Props = {
   token: string;
   name: string;
+  inviteText: string;
   existing: Existing | null;
 };
 
@@ -96,7 +97,7 @@ function TimeColumn({
   );
 }
 
-export default function InviteFlow({ token, name, existing }: Props) {
+export default function InviteFlow({ token, name, inviteText, existing }: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
   const [date, setDate] = useState("");
@@ -220,7 +221,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-7xl animate-float">👤</span>
           <h1 className="text-2xl font-bold leading-relaxed">
-            {name}، با من سر قرار میای؟
+            {name}، {inviteText}
           </h1>
           <div className="w-full max-w-sm">
             <div className="flex items-center gap-3">

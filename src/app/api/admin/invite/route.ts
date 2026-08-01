@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { createInvitation } from "@/lib/invite-queries";
+import { normalizeInviteText } from "@/lib/invite-defaults";
 
 export async function POST(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { recipientName, expiresAt } = body;
+  const { recipientName, inviteText, expiresAt } = body;
 
   if (!recipientName || typeof recipientName !== "string") {
     return NextResponse.json({ error: "name_required" }, { status: 400 });
@@ -22,6 +23,10 @@ export async function POST(request: NextRequest) {
 
   if (recipientName.trim().length > 100) {
     return NextResponse.json({ error: "name_too_long" }, { status: 400 });
+  }
+
+  if (typeof inviteText === "string" && inviteText.trim().length > 200) {
+    return NextResponse.json({ error: "invite_text_too_long" }, { status: 400 });
   }
 
   let parsedExpiry: string | null = null;
@@ -32,7 +37,11 @@ export async function POST(request: NextRequest) {
     parsedExpiry = expiresAt;
   }
 
-  const token = await createInvitation(recipientName.trim(), parsedExpiry);
+  const token = await createInvitation(
+    recipientName.trim(),
+    normalizeInviteText(inviteText),
+    parsedExpiry
+  );
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
   const url = `${appUrl}/i/${token}`;
