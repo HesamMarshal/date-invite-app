@@ -3,8 +3,7 @@
 import { useState, useCallback } from "react";
 import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
 import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
-import DatePicker, { Calendar, DateObject } from "react-multi-date-picker";
-import TimePicker from "react-multi-date-picker/plugins/time_picker";
+import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
@@ -55,17 +54,46 @@ function Btn({
   );
 }
 
-function roundToFiveMinutes(date: DateObject) {
-  const minutes = Math.round(date.minute / 5) * 5;
-  date.setMinute(minutes >= 60 ? 55 : minutes);
-  date.setSecond(0);
-  date.setMillisecond(0);
-  return date;
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
 }
 
-function applyTime(date: DateObject) {
-  const formatted = toAsciiDigits(date.format("HH:mm"));
-  return { date, formatted };
+function roundMinuteToStep(minute: number, step = 5) {
+  const rounded = Math.round(minute / step) * step;
+  return rounded >= 60 ? 60 - step : rounded;
+}
+
+function formatTime(hour: number, minute: number) {
+  return `${pad2(hour)}:${pad2(minute)}`;
+}
+
+function TimeColumn({
+  value,
+  label,
+  onInc,
+  onDec,
+}: {
+  value: string;
+  label: string;
+  onInc: () => void;
+  onDec: () => void;
+}) {
+  const btn =
+    "flex h-12 w-14 items-center justify-center rounded-xl bg-pink-50 text-pink-600 text-xl font-bold transition active:scale-95 active:bg-pink-100";
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <button type="button" aria-label={`${label} بیشتر`} onClick={onInc} className={btn}>
+        ▲
+      </button>
+      <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-pink-200 bg-white text-3xl font-bold tabular-nums text-zinc-900">
+        {value}
+      </div>
+      <button type="button" aria-label={`${label} کمتر`} onClick={onDec} className={btn}>
+        ▼
+      </button>
+      <span className="text-xs text-zinc-400">{label}</span>
+    </div>
+  );
 }
 
 export default function InviteFlow({ token, name, existing }: Props) {
@@ -73,17 +101,39 @@ export default function InviteFlow({ token, name, existing }: Props) {
   const [noCount, setNoCount] = useState(0);
   const [date, setDate] = useState("");
   const [dateLabel, setDateLabel] = useState("");
-  const [time, setTime] = useState("");
-  const [timeLabel, setTimeLabel] = useState("");
-  const [timeValue, setTimeValue] = useState<DateObject | null>(null);
+  const [hour, setHour] = useState(() => new Date().getHours());
+  const [minute, setMinute] = useState(() =>
+    roundMinuteToStep(new Date().getMinutes())
+  );
   const [food, setFood] = useState<FoodChoice | "">("");
   const [error, setError] = useState("");
+  const time = formatTime(hour, minute);
+  const timeLabel = time;
   const noLabels = [
     "🤍 نه",
     "😅 نه",
     "🥺 نه",
     "🙈 نه",
   ] as const;
+
+  const bumpHour = (delta: number) => {
+    setHour((h) => (h + delta + 24) % 24);
+  };
+
+  const bumpMinute = (delta: number) => {
+    const next = minute + delta * 5;
+    if (next >= 60) {
+      setMinute(0);
+      setHour((h) => (h + 1) % 24);
+      return;
+    }
+    if (next < 0) {
+      setMinute(55);
+      setHour((h) => (h + 23) % 24);
+      return;
+    }
+    setMinute(next);
+  };
 
   const submit = useCallback(
     async (accepted: boolean) => {
@@ -244,21 +294,7 @@ export default function InviteFlow({ token, name, existing }: Props) {
               setDate(toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD")));
             }}
           />
-          <Btn
-            onClick={() => {
-              if (!date) return;
-              if (!timeValue) {
-                const { date: next, formatted } = applyTime(
-                  roundToFiveMinutes(new DateObject())
-                );
-                setTimeValue(next);
-                setTimeLabel(formatted);
-                setTime(formatted);
-              }
-              setStep("time");
-            }}
-            disabled={!date}
-          >
+          <Btn onClick={() => date && setStep("time")} disabled={!date}>
             بعدی ←
           </Btn>
         </div>
@@ -269,33 +305,25 @@ export default function InviteFlow({ token, name, existing }: Props) {
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">🕐</span>
           <h1 className="text-2xl font-bold">چه ساعتی؟</h1>
-          <p className="text-3xl font-bold tabular-nums text-pink-600 min-h-10">
-            {timeLabel || "––:––"}
+          <p className="text-4xl font-bold tabular-nums text-pink-600 tracking-wide">
+            {timeLabel}
           </p>
-          <Calendar
-            disableDayPicker
-            format="HH:mm"
-            plugins={[
-              <TimePicker key="time" hideSeconds mStep={5} />,
-            ]}
-            value={timeValue}
-            onChange={(value) => {
-              if (!value || Array.isArray(value)) {
-                setTime("");
-                setTimeLabel("");
-                setTimeValue(null);
-                return;
-              }
-              const { date: next, formatted } = applyTime(value as DateObject);
-              setTimeValue(next);
-              setTimeLabel(formatted);
-              setTime(formatted);
-            }}
-            className="rmdp-time-inline"
-          />
-          <Btn onClick={() => time && setStep("food")} disabled={!time}>
-            تأیید ساعت ←
-          </Btn>
+          <div className="flex items-center gap-4 rounded-3xl border border-pink-100 bg-white px-6 py-5 shadow-sm">
+            <TimeColumn
+              value={pad2(hour)}
+              label="ساعت"
+              onInc={() => bumpHour(1)}
+              onDec={() => bumpHour(-1)}
+            />
+            <span className="pb-6 text-3xl font-bold text-zinc-300">:</span>
+            <TimeColumn
+              value={pad2(minute)}
+              label="دقیقه"
+              onInc={() => bumpMinute(1)}
+              onDec={() => bumpMinute(-1)}
+            />
+          </div>
+          <Btn onClick={() => setStep("food")}>تأیید ساعت ←</Btn>
         </div>
       )}
 
@@ -342,19 +370,13 @@ export default function InviteFlow({ token, name, existing }: Props) {
           <h1 className="text-2xl font-bold">ممنون ❤️</h1>
           <p className="text-lg text-zinc-600">قرارمون ثبت شد!</p>
           <div className="rounded-2xl bg-white p-6 shadow-sm space-y-3 text-zinc-700 animate-scale-in">
-            <p>
-              📅 {dateLabel}
-            </p>
-            <p>
-              🕐 {timeLabel}
-            </p>
+            <p>📅 {dateLabel}</p>
+            <p>🕐 {timeLabel}</p>
             <p>
               {FOOD_OPTIONS.find((o) => o.label === food)?.emoji} {food}
             </p>
           </div>
-          <p className="text-sm text-zinc-400 mt-4">
-            منتظر دیدنت هستم 😊
-          </p>
+          <p className="text-sm text-zinc-400 mt-4">منتظر دیدنت هستم 😊</p>
         </div>
       )}
 
