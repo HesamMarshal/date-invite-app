@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getInvitationByToken, upsertResponse } from "@/lib/invite-queries";
-import { isValidFoodChoice } from "@/lib/food-options";
+import { isFoodChoiceAllowed } from "@/lib/option-queries";
 import { isValidMysqlDatetime } from "@/lib/datetime";
 
 const RATE_LIMIT = new Map<string, number>();
@@ -52,10 +52,12 @@ export async function POST(request: NextRequest) {
       !selectedDatetime ||
       typeof selectedDatetime !== "string" ||
       !foodChoice ||
-      typeof foodChoice !== "string" ||
-      !isValidFoodChoice(foodChoice)
+      typeof foodChoice !== "string"
     ) {
       return NextResponse.json({ error: "missing_fields" }, { status: 400 });
+    }
+    if (!(await isFoodChoiceAllowed(invite.id, foodChoice))) {
+      return NextResponse.json({ error: "invalid_food" }, { status: 400 });
     }
     if (!isValidMysqlDatetime(selectedDatetime)) {
       return NextResponse.json({ error: "invalid_datetime" }, { status: 400 });

@@ -4,6 +4,7 @@ import {
   recordOpen,
   getResponseByInvitationId,
 } from "@/lib/invite-queries";
+import { getOptionsForInvitation } from "@/lib/option-queries";
 import InviteFlow from "./invite-flow";
 
 type Props = {
@@ -21,7 +22,10 @@ export default async function InvitePage({ params }: Props) {
 
   await recordOpen(invite.id);
 
-  const existing = await getResponseByInvitationId(invite.id);
+  const [existing, foodOptions] = await Promise.all([
+    getResponseByInvitationId(invite.id),
+    getOptionsForInvitation(invite.id),
+  ]);
 
   if (expired) {
     return (
@@ -38,6 +42,7 @@ export default async function InvitePage({ params }: Props) {
       token={token}
       name={invite.recipient_name}
       inviteText={invite.invite_text}
+      foodOptions={foodOptions}
       existing={
         existing
           ? {

@@ -106,15 +106,33 @@ function generateToken(length = 16): string {
 export async function createInvitation(
   recipientName: string,
   inviteText: string,
-  expiresAt: string | null
+  expiresAt: string | null,
+  optionIds: number[]
 ): Promise<string> {
   const pool = getPool();
   const token = generateToken();
-  await pool.query<ResultSetHeader>(
-    `INSERT INTO invitations (token, recipient_name, invite_text, expires_at) VALUES (?, ?, ?, ?)`,
-    [token, recipientName, inviteText, expiresAt || null]
-  );
-  return token;
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [result] = await conn.query<ResultSetHeader>(
+      `INSERT INTO invitations (token, recipient_name, invite_text, expires_at) VALUES (?, ?, ?, ?)`,
+      [token, recipientName, inviteText, expiresAt || null]
+    );
+    const invitationId = result.insertId;
+    for (const optionId of optionIds) {
+      await conn.query(
+        `INSERT INTO invitation_options (invitation_id, option_id) VALUES (?, ?)`,
+        [invitationId, optionId]
+      );
+    }
+    await conn.commit();
+    return token;
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 }
 
 export async function deleteInvitation(id: number): Promise<boolean> {

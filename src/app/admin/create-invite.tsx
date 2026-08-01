@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -8,6 +8,12 @@ import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
 import { buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
+import {
+  MAX_INVITE_OPTIONS,
+  MIN_INVITE_OPTIONS,
+} from "@/lib/food-options";
+
+type OptionItem = { id: number; emoji: string; label: string };
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -42,7 +48,15 @@ function TimeColumn({
   );
 }
 
-export default function CreateInvite({ appUrl }: { appUrl: string }) {
+function defaultSelectedIds(options: OptionItem[]): number[] {
+  return options.slice(0, MAX_INVITE_OPTIONS).map((o) => o.id);
+}
+
+export default function CreateInvite({
+  activeOptions,
+}: {
+  activeOptions: OptionItem[];
+}) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [inviteText, setInviteText] = useState("");
@@ -50,12 +64,30 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
   const [expiryDateLabel, setExpiryDateLabel] = useState("");
   const [hour, setHour] = useState(23);
   const [minute, setMinute] = useState(55);
+  const [selectedIds, setSelectedIds] = useState<number[]>(() =>
+    defaultSelectedIds(activeOptions)
+  );
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ token: string; url: string } | null>(
     null
   );
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const selectedCount = selectedIds.length;
+  const optionsValid =
+    selectedCount >= MIN_INVITE_OPTIONS &&
+    selectedCount <= MAX_INVITE_OPTIONS;
+
+  const errorFa = useMemo(
+    () =>
+      ({
+        invalid_option_count: `بین ${MIN_INVITE_OPTIONS} تا ${MAX_INVITE_OPTIONS} گزینه انتخاب کن`,
+        invalid_options: "یکی از گزینه‌ها معتبر نیست",
+        invalid_expiry: "تاریخ انقضا درست نیست",
+      }) as Record<string, string>,
+    []
+  );
 
   const bumpHour = (delta: number) => {
     setHour((h) => (h + delta + 24) % 24);
@@ -83,9 +115,17 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
     setMinute(55);
   };
 
+  const toggleOption = (id: number) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= MAX_INVITE_OPTIONS) return prev;
+      return [...prev, id];
+    });
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim() || !optionsValid) return;
     setLoading(true);
     setError("");
 
@@ -111,6 +151,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
           recipientName: name.trim(),
           inviteText: inviteText.trim() || DEFAULT_INVITE_TEXT,
           expiresAt,
+          optionIds: selectedIds,
         }),
       });
 
@@ -122,9 +163,10 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
         setName("");
         setInviteText("");
         clearExpiry();
+        setSelectedIds(defaultSelectedIds(activeOptions));
         router.refresh();
       } else {
-        setError(data.error || "خطایی رخ داد");
+        setError(errorFa[data.error] || data.error || "خطایی رخ داد");
       }
     } catch {
       setLoading(false);
@@ -171,6 +213,48 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
               پیش‌نمایش: {name.trim()}،{" "}
               {inviteText.trim() || DEFAULT_INVITE_TEXT}
             </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-zinc-400">
+              گزینه‌ها ({MIN_INVITE_OPTIONS} تا {MAX_INVITE_OPTIONS})
+            </label>
+            <span
+              className={`text-xs ${optionsValid ? "text-zinc-400" : "text-red-500"}`}
+            >
+              {selectedCount} انتخاب‌شده
+            </span>
+          </div>
+          {activeOptions.length === 0 ? (
+            <p className="text-sm text-red-500 text-center py-2">
+              اول از «مدیریت گزینه‌ها» حداقل {MIN_INVITE_OPTIONS} تا بساز
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {activeOptions.map((opt) => {
+                const checked = selectedIds.includes(opt.id);
+                const disabled =
+                  !checked && selectedIds.length >= MAX_INVITE_OPTIONS;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => toggleOption(opt.id)}
+                    className={`rounded-xl border-2 px-3 py-3 text-sm font-medium transition disabled:opacity-40 ${
+                      checked
+                        ? "border-pink-500 bg-pink-50"
+                        : "border-zinc-200 bg-white"
+                    }`}
+                  >
+                    <span className="text-xl block mb-0.5">{opt.emoji}</span>
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           )}
         </div>
 
@@ -243,7 +327,7 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
         <div className="flex gap-2">
           <button
             type="submit"
-            disabled={loading || !name.trim()}
+            disabled={loading || !name.trim() || !optionsValid}
             className="flex-1 rounded-full bg-pink-500 px-6 py-3 text-white font-bold transition hover:bg-pink-600 disabled:opacity-40"
           >
             {loading ? "..." : "بساز"}

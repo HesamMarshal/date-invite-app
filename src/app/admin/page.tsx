@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
+import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
 import CopyButtonClient from "./copy-button";
 import DeleteInviteButton from "./delete-invite-button";
@@ -8,10 +10,14 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   let invites: Awaited<ReturnType<typeof getAllInvitationsWithResponses>> = [];
+  let activeOptions: Awaited<ReturnType<typeof listInviteOptions>> = [];
   let dbError = false;
 
   try {
-    invites = await getAllInvitationsWithResponses();
+    [invites, activeOptions] = await Promise.all([
+      getAllInvitationsWithResponses(),
+      listInviteOptions(true),
+    ]);
   } catch {
     dbError = true;
   }
@@ -21,9 +27,17 @@ export default async function AdminPage() {
 
   return (
     <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/options"
+            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
+          >
+            مدیریت گزینه‌ها
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       {dbError && (
@@ -32,7 +46,15 @@ export default async function AdminPage() {
         </div>
       )}
 
-      <CreateInvite appUrl={appUrl} />
+      {!dbError && (
+        <CreateInvite
+          activeOptions={activeOptions.map((o) => ({
+            id: o.id,
+            emoji: o.emoji,
+            label: o.label,
+          }))}
+        />
+      )}
 
       {!dbError && invites.length === 0 && (
         <p className="text-zinc-400 text-center py-12">

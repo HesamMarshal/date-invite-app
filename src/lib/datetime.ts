@@ -50,6 +50,7 @@ export const API_ERROR_FA: Record<string, string> = {
   invalid: "درخواست نامعتبره",
   invalid_json: "درخواست نامعتبره",
   invalid_datetime: "تاریخ یا ساعت درست نیست",
+  invalid_food: "این گزینه برای این دعوت معتبر نیست",
   missing_fields: "لطفاً تاریخ، ساعت و انتخاب غذا رو کامل کن",
   not_found: "لینک پیدا نشد",
   expired: "این دعوت منقضی شده",

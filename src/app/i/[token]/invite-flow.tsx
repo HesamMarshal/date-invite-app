@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { FOOD_OPTIONS, type FoodChoice } from "@/lib/food-options";
 import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
+
+type FoodOption = { id: number; emoji: string; label: string };
 
 type Existing = {
   accepted: boolean;
@@ -18,6 +19,7 @@ type Props = {
   token: string;
   name: string;
   inviteText: string;
+  foodOptions: FoodOption[];
   existing: Existing | null;
 };
 
@@ -97,7 +99,13 @@ function TimeColumn({
   );
 }
 
-export default function InviteFlow({ token, name, inviteText, existing }: Props) {
+export default function InviteFlow({
+  token,
+  name,
+  inviteText,
+  foodOptions,
+  existing,
+}: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
   const [date, setDate] = useState("");
@@ -106,7 +114,7 @@ export default function InviteFlow({ token, name, inviteText, existing }: Props)
   const [minute, setMinute] = useState(() =>
     roundMinuteToStep(new Date().getMinutes())
   );
-  const [food, setFood] = useState<FoodChoice | "">("");
+  const [food, setFood] = useState("");
   const [error, setError] = useState("");
   const time = formatTime(hour, minute);
   const timeLabel = time;
@@ -337,9 +345,9 @@ export default function InviteFlow({ token, name, inviteText, existing }: Props)
           <span className="text-6xl">🍽️</span>
           <h1 className="text-2xl font-bold">چی دوست داری؟</h1>
           <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
-            {FOOD_OPTIONS.map((opt) => (
+            {foodOptions.map((opt) => (
               <button
-                key={opt.label}
+                key={opt.id}
                 onClick={() => setFood(opt.label)}
                 className={`rounded-2xl border-2 px-4 py-5 text-base font-medium transition-all duration-200 active:scale-[0.97] select-none ${
                   food === opt.label
@@ -377,7 +385,7 @@ export default function InviteFlow({ token, name, inviteText, existing }: Props)
             <p>📅 {dateLabel}</p>
             <p>🕐 {timeLabel}</p>
             <p>
-              {FOOD_OPTIONS.find((o) => o.label === food)?.emoji} {food}
+              {foodOptions.find((o) => o.label === food)?.emoji} {food}
             </p>
           </div>
           <p className="text-sm text-zinc-400 mt-4">منتظر دیدنت هستم 😊</p>

@@ -3,6 +3,14 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { createInvitation, deleteInvitation } from "@/lib/invite-queries";
 import { normalizeInviteText } from "@/lib/invite-defaults";
 import { isValidMysqlDatetime } from "@/lib/datetime";
+import {
+  MIN_INVITE_OPTIONS,
+  MAX_INVITE_OPTIONS,
+} from "@/lib/food-options";
+import {
+  countActiveOptionsByIds,
+  listInviteOptions,
+} from "@/lib/option-queries";
 
 export async function POST(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
@@ -16,7 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { recipientName, inviteText, expiresAt } = body;
+  const { recipientName, inviteText, expiresAt, optionIds } = body;
 
   if (!recipientName || typeof recipientName !== "string") {
     return NextResponse.json({ error: "name_required" }, { status: 400 });
@@ -28,6 +36,32 @@ export async function POST(request: NextRequest) {
 
   if (typeof inviteText === "string" && inviteText.trim().length > 200) {
     return NextResponse.json({ error: "invite_text_too_long" }, { status: 400 });
+  }
+
+  let resolvedOptionIds: number[];
+  if (Array.isArray(optionIds) && optionIds.length > 0) {
+    resolvedOptionIds = [
+      ...new Set(
+        optionIds
+          .map((id) => (typeof id === "number" ? id : Number(id)))
+          .filter((id) => Number.isInteger(id) && id > 0)
+      ),
+    ];
+  } else {
+    const active = await listInviteOptions(true);
+    resolvedOptionIds = active.slice(0, MAX_INVITE_OPTIONS).map((o) => o.id);
+  }
+
+  if (
+    resolvedOptionIds.length < MIN_INVITE_OPTIONS ||
+    resolvedOptionIds.length > MAX_INVITE_OPTIONS
+  ) {
+    return NextResponse.json({ error: "invalid_option_count" }, { status: 400 });
+  }
+
+  const matched = await countActiveOptionsByIds(resolvedOptionIds);
+  if (matched !== resolvedOptionIds.length) {
+    return NextResponse.json({ error: "invalid_options" }, { status: 400 });
   }
 
   let parsedExpiry: string | null = null;
@@ -48,7 +82,8 @@ export async function POST(request: NextRequest) {
   const token = await createInvitation(
     recipientName.trim(),
     normalizeInviteText(inviteText),
-    parsedExpiry
+    parsedExpiry,
+    resolvedOptionIds
   );
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
