@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { createInvitation, deleteInvitation } from "@/lib/invite-queries";
 import { normalizeInviteText } from "@/lib/invite-defaults";
-import { isValidMysqlDatetime } from "@/lib/datetime";
+import {
+  isValidMysqlDate,
+  isValidMysqlDatetime,
+  toTimeHm,
+  validateInviteWindows,
+} from "@/lib/datetime";
 import {
   MIN_INVITE_OPTIONS,
   MAX_INVITE_OPTIONS,
@@ -11,6 +16,21 @@ import {
   countActiveOptionsByIds,
   listInviteOptions,
 } from "@/lib/option-queries";
+
+function parseOptionalDate(value: unknown): string | null | "invalid" {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string") return "invalid";
+  const d = value.trim();
+  return isValidMysqlDate(d) ? d : "invalid";
+}
+
+function parseOptionalTime(value: unknown): string | null | "invalid" {
+  if (value == null || value === "") return null;
+  if (typeof value !== "string") return "invalid";
+  const t = toTimeHm(value);
+  if (!t) return "invalid";
+  return `${t}:00`;
+}
 
 export async function POST(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
@@ -24,7 +44,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { recipientName, inviteText, expiresAt, optionIds } = body;
+  const {
+    recipientName,
+    inviteText,
+    expiresAt,
+    optionIds,
+    dateFrom,
+    dateTo,
+    timeFrom,
+    timeTo,
+  } = body;
 
   if (!recipientName || typeof recipientName !== "string") {
     return NextResponse.json({ error: "name_required" }, { status: 400 });
@@ -64,6 +93,37 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_options" }, { status: 400 });
   }
 
+  const parsedDateFrom = parseOptionalDate(dateFrom);
+  const parsedDateTo = parseOptionalDate(dateTo);
+  const parsedTimeFrom = parseOptionalTime(timeFrom);
+  const parsedTimeTo = parseOptionalTime(timeTo);
+
+  if (
+    parsedDateFrom === "invalid" ||
+    parsedDateTo === "invalid" ||
+    parsedTimeFrom === "invalid" ||
+    parsedTimeTo === "invalid"
+  ) {
+    return NextResponse.json({ error: "invalid_window" }, { status: 400 });
+  }
+
+  const windows = {
+    dateFrom: parsedDateFrom,
+    dateTo: parsedDateTo,
+    timeFrom: parsedTimeFrom,
+    timeTo: parsedTimeTo,
+  };
+
+  const windowError = validateInviteWindows({
+    dateFrom: windows.dateFrom,
+    dateTo: windows.dateTo,
+    timeFrom: windows.timeFrom ? toTimeHm(windows.timeFrom) : null,
+    timeTo: windows.timeTo ? toTimeHm(windows.timeTo) : null,
+  });
+  if (windowError) {
+    return NextResponse.json({ error: windowError }, { status: 400 });
+  }
+
   let parsedExpiry: string | null = null;
   if (expiresAt && typeof expiresAt === "string") {
     const normalized = expiresAt.includes("T")
@@ -83,7 +143,8 @@ export async function POST(request: NextRequest) {
     recipientName.trim(),
     normalizeInviteText(inviteText),
     parsedExpiry,
-    resolvedOptionIds
+    resolvedOptionIds,
+    windows
   );
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";

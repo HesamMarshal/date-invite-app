@@ -10,8 +10,19 @@ export interface Invitation {
   opened_at: string | null;
   open_count: number;
   expires_at: string | null;
+  date_from: string | Date | null;
+  date_to: string | Date | null;
+  time_from: string | null;
+  time_to: string | null;
   created_at: string;
 }
+
+export type InviteWindowFields = {
+  dateFrom: string | null;
+  dateTo: string | null;
+  timeFrom: string | null;
+  timeTo: string | null;
+};
 
 export interface InviteResponse {
   id: number;
@@ -107,7 +118,8 @@ export async function createInvitation(
   recipientName: string,
   inviteText: string,
   expiresAt: string | null,
-  optionIds: number[]
+  optionIds: number[],
+  windows: InviteWindowFields
 ): Promise<string> {
   const pool = getPool();
   const token = generateToken();
@@ -115,8 +127,20 @@ export async function createInvitation(
   try {
     await conn.beginTransaction();
     const [result] = await conn.query<ResultSetHeader>(
-      `INSERT INTO invitations (token, recipient_name, invite_text, expires_at) VALUES (?, ?, ?, ?)`,
-      [token, recipientName, inviteText, expiresAt || null]
+      `INSERT INTO invitations
+         (token, recipient_name, invite_text, expires_at,
+          date_from, date_to, time_from, time_to)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        token,
+        recipientName,
+        inviteText,
+        expiresAt || null,
+        windows.dateFrom,
+        windows.dateTo,
+        windows.timeFrom,
+        windows.timeTo,
+      ]
     );
     const invitationId = result.insertId;
     for (const optionId of optionIds) {

@@ -5,6 +5,7 @@ import {
   getResponseByInvitationId,
 } from "@/lib/invite-queries";
 import { getOptionsForInvitation } from "@/lib/option-queries";
+import { toDateOnly, toTimeHm } from "@/lib/datetime";
 import InviteFlow from "./invite-flow";
 
 type Props = {
@@ -43,6 +44,12 @@ export default async function InvitePage({ params }: Props) {
       name={invite.recipient_name}
       inviteText={invite.invite_text}
       foodOptions={foodOptions}
+      windows={{
+        dateFrom: toDateOnly(invite.date_from),
+        dateTo: toDateOnly(invite.date_to),
+        timeFrom: toTimeHm(invite.time_from),
+        timeTo: toTimeHm(invite.time_to),
+      }}
       existing={
         existing
           ? {

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getInvitationByToken, upsertResponse } from "@/lib/invite-queries";
 import { isFoodChoiceAllowed } from "@/lib/option-queries";
-import { isValidMysqlDatetime } from "@/lib/datetime";
+import {
+  isSelectedInWindows,
+  isValidMysqlDatetime,
+  toDateOnly,
+  toTimeHm,
+} from "@/lib/datetime";
 
 const RATE_LIMIT = new Map<string, number>();
 const RATE_WINDOW = 60_000;
@@ -61,6 +66,16 @@ export async function POST(request: NextRequest) {
     }
     if (!isValidMysqlDatetime(selectedDatetime)) {
       return NextResponse.json({ error: "invalid_datetime" }, { status: 400 });
+    }
+    if (
+      !isSelectedInWindows(selectedDatetime, {
+        dateFrom: toDateOnly(invite.date_from),
+        dateTo: toDateOnly(invite.date_to),
+        timeFrom: toTimeHm(invite.time_from),
+        timeTo: toTimeHm(invite.time_to),
+      })
+    ) {
+      return NextResponse.json({ error: "outside_window" }, { status: 400 });
     }
   }
 

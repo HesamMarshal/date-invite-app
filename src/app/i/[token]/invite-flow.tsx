@@ -1,13 +1,26 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { API_ERROR_FA, buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
+import {
+  API_ERROR_FA,
+  buildSelectedDatetime,
+  clampMinutesToWindow,
+  timeToMinutes,
+  toAsciiDigits,
+} from "@/lib/datetime";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 
 type FoodOption = { id: number; emoji: string; label: string };
+
+type Windows = {
+  dateFrom: string | null;
+  dateTo: string | null;
+  timeFrom: string | null;
+  timeTo: string | null;
+};
 
 type Existing = {
   accepted: boolean;
@@ -20,6 +33,7 @@ type Props = {
   name: string;
   inviteText: string;
   foodOptions: FoodOption[];
+  windows: Windows;
   existing: Existing | null;
 };
 
@@ -99,21 +113,45 @@ function TimeColumn({
   );
 }
 
+function initialTimeParts(windows: Windows) {
+  if (windows.timeFrom) {
+    const mins = timeToMinutes(windows.timeFrom) ?? 0;
+    const clamped = clampMinutesToWindow(
+      mins,
+      windows.timeFrom,
+      windows.timeTo
+    );
+    return {
+      hour: Math.floor(clamped / 60),
+      minute: clamped % 60,
+    };
+  }
+  const nowMins = new Date().getHours() * 60 + roundMinuteToStep(new Date().getMinutes());
+  const clamped = clampMinutesToWindow(
+    nowMins,
+    windows.timeFrom,
+    windows.timeTo
+  );
+  return {
+    hour: Math.floor(clamped / 60),
+    minute: clamped % 60,
+  };
+}
+
 export default function InviteFlow({
   token,
   name,
   inviteText,
   foodOptions,
+  windows,
   existing,
 }: Props) {
   const [step, setStep] = useState<Step>(existing ? "current" : "ask");
   const [noCount, setNoCount] = useState(0);
   const [date, setDate] = useState("");
   const [dateLabel, setDateLabel] = useState("");
-  const [hour, setHour] = useState(() => new Date().getHours());
-  const [minute, setMinute] = useState(() =>
-    roundMinuteToStep(new Date().getMinutes())
-  );
+  const [hour, setHour] = useState(() => initialTimeParts(windows).hour);
+  const [minute, setMinute] = useState(() => initialTimeParts(windows).minute);
   const [food, setFood] = useState("");
   const [error, setError] = useState("");
   const time = formatTime(hour, minute);
@@ -125,23 +163,27 @@ export default function InviteFlow({
     "🙈 نه",
   ] as const;
 
+  const minMinutes = windows.timeFrom
+    ? timeToMinutes(windows.timeFrom) ?? 0
+    : 0;
+  const maxMinutes = windows.timeTo
+    ? timeToMinutes(windows.timeTo) ?? 23 * 60 + 55
+    : 23 * 60 + 55;
+
+  const setClampedTime = (totalMinutes: number) => {
+    const clamped = Math.min(maxMinutes, Math.max(minMinutes, totalMinutes));
+    const snapped = Math.round(clamped / 5) * 5;
+    const final = Math.min(maxMinutes, Math.max(minMinutes, snapped));
+    setHour(Math.floor(final / 60));
+    setMinute(final % 60);
+  };
+
   const bumpHour = (delta: number) => {
-    setHour((h) => (h + delta + 24) % 24);
+    setClampedTime(hour * 60 + minute + delta * 60);
   };
 
   const bumpMinute = (delta: number) => {
-    const next = minute + delta * 5;
-    if (next >= 60) {
-      setMinute(0);
-      setHour((h) => (h + 1) % 24);
-      return;
-    }
-    if (next < 0) {
-      setMinute(55);
-      setHour((h) => (h + 23) % 24);
-      return;
-    }
-    setMinute(next);
+    setClampedTime(hour * 60 + minute + delta * 5);
   };
 
   const submit = useCallback(
@@ -284,12 +326,21 @@ export default function InviteFlow({
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">📅</span>
           <h1 className="text-2xl font-bold">چه روزی؟</h1>
+          {(windows.dateFrom || windows.dateTo) && (
+            <p className="text-sm text-zinc-400">
+              {windows.dateFrom && windows.dateTo
+                ? `فقط بین ${windows.dateFrom} تا ${windows.dateTo}`
+                : null}
+            </p>
+          )}
           <DatePicker
             calendar={persian}
             locale={persianFa}
             value={dateLabel || undefined}
             editable={false}
             calendarPosition="bottom-center"
+            minDate={windows.dateFrom || undefined}
+            maxDate={windows.dateTo || undefined}
             inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
             containerClassName="w-full max-w-xs"
             placeholder="یک تاریخ انتخاب کن"
@@ -299,8 +350,13 @@ export default function InviteFlow({
                 setDateLabel("");
                 return;
               }
+              const g = toAsciiDigits(
+                value.convert(gregorian).format("YYYY-MM-DD")
+              );
+              if (windows.dateFrom && g < windows.dateFrom) return;
+              if (windows.dateTo && g > windows.dateTo) return;
               setDateLabel(value.format("YYYY/MM/DD"));
-              setDate(toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD")));
+              setDate(g);
             }}
           />
           <Btn onClick={() => date && setStep("time")} disabled={!date}>
@@ -314,6 +370,13 @@ export default function InviteFlow({
         <div className="flex flex-col items-center gap-8 animate-fade-in">
           <span className="text-6xl">🕐</span>
           <h1 className="text-2xl font-bold">چه ساعتی؟</h1>
+          {(windows.timeFrom || windows.timeTo) && (
+            <p className="text-sm text-zinc-400">
+              {windows.timeFrom && windows.timeTo
+                ? `فقط بین ${windows.timeFrom} تا ${windows.timeTo}`
+                : null}
+            </p>
+          )}
           <p className="text-4xl font-bold tabular-nums text-pink-600 tracking-wide">
             {timeLabel}
           </p>

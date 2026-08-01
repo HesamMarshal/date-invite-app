@@ -48,8 +48,70 @@ function TimeColumn({
   );
 }
 
+function TimeStepper({
+  hour,
+  minute,
+  onBumpHour,
+  onBumpMinute,
+}: {
+  hour: number;
+  minute: number;
+  onBumpHour: (d: number) => void;
+  onBumpMinute: (d: number) => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <p className="text-lg font-bold tabular-nums text-pink-600">
+        {pad2(hour)}:{pad2(minute)}
+      </p>
+      <div
+        dir="ltr"
+        className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3"
+      >
+        <TimeColumn
+          value={pad2(hour)}
+          label="ساعت"
+          onInc={() => onBumpHour(1)}
+          onDec={() => onBumpHour(-1)}
+        />
+        <span className="pb-5 text-2xl font-bold text-zinc-300">:</span>
+        <TimeColumn
+          value={pad2(minute)}
+          label="دقیقه"
+          onInc={() => onBumpMinute(1)}
+          onDec={() => onBumpMinute(-1)}
+        />
+      </div>
+    </div>
+  );
+}
+
 function defaultSelectedIds(options: OptionItem[]): number[] {
   return options.slice(0, MAX_INVITE_OPTIONS).map((o) => o.id);
+}
+
+function bumpClock(
+  hour: number,
+  minute: number,
+  deltaHour: number,
+  deltaMinSteps: number
+): { hour: number; minute: number } {
+  let h = hour;
+  let m = minute;
+  if (deltaHour) h = (h + deltaHour + 24) % 24;
+  if (deltaMinSteps) {
+    const next = m + deltaMinSteps * 5;
+    if (next >= 60) {
+      m = 0;
+      h = (h + 1) % 24;
+    } else if (next < 0) {
+      m = 55;
+      h = (h + 23) % 24;
+    } else {
+      m = next;
+    }
+  }
+  return { hour: h, minute: m };
 }
 
 export default function CreateInvite({
@@ -60,10 +122,23 @@ export default function CreateInvite({
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [inviteText, setInviteText] = useState("");
+
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateFromLabel, setDateFromLabel] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [dateToLabel, setDateToLabel] = useState("");
+
+  const [useTimeWindow, setUseTimeWindow] = useState(false);
+  const [fromHour, setFromHour] = useState(10);
+  const [fromMinute, setFromMinute] = useState(0);
+  const [toHour, setToHour] = useState(22);
+  const [toMinute, setToMinute] = useState(0);
+
   const [expiryDate, setExpiryDate] = useState("");
   const [expiryDateLabel, setExpiryDateLabel] = useState("");
   const [hour, setHour] = useState(23);
   const [minute, setMinute] = useState(55);
+
   const [selectedIds, setSelectedIds] = useState<number[]>(() =>
     defaultSelectedIds(activeOptions)
   );
@@ -85,27 +160,20 @@ export default function CreateInvite({
         invalid_option_count: `بین ${MIN_INVITE_OPTIONS} تا ${MAX_INVITE_OPTIONS} گزینه انتخاب کن`,
         invalid_options: "یکی از گزینه‌ها معتبر نیست",
         invalid_expiry: "تاریخ انقضا درست نیست",
+        incomplete_date_window: "هر دو تاریخ از و تا رو پر کن",
+        incomplete_time_window: "هر دو ساعت از و تا رو پر کن",
+        invalid_date_window: "بازه تاریخ درست نیست",
+        invalid_time_window: "بازه ساعت درست نیست (از ≤ تا)",
+        invalid_window: "بازه تاریخ/ساعت درست نیست",
       }) as Record<string, string>,
     []
   );
 
-  const bumpHour = (delta: number) => {
-    setHour((h) => (h + delta + 24) % 24);
-  };
-
-  const bumpMinute = (delta: number) => {
-    const next = minute + delta * 5;
-    if (next >= 60) {
-      setMinute(0);
-      setHour((h) => (h + 1) % 24);
-      return;
-    }
-    if (next < 0) {
-      setMinute(55);
-      setHour((h) => (h + 23) % 24);
-      return;
-    }
-    setMinute(next);
+  const clearDateWindow = () => {
+    setDateFrom("");
+    setDateFromLabel("");
+    setDateTo("");
+    setDateToLabel("");
   };
 
   const clearExpiry = () => {
@@ -113,6 +181,16 @@ export default function CreateInvite({
     setExpiryDateLabel("");
     setHour(23);
     setMinute(55);
+  };
+
+  const resetWindows = () => {
+    clearDateWindow();
+    setUseTimeWindow(false);
+    setFromHour(10);
+    setFromMinute(0);
+    setToHour(22);
+    setToMinute(0);
+    clearExpiry();
   };
 
   const toggleOption = (id: number) => {
@@ -128,6 +206,29 @@ export default function CreateInvite({
     if (!name.trim() || !optionsValid) return;
     setLoading(true);
     setError("");
+
+    if ((dateFrom && !dateTo) || (!dateFrom && dateTo)) {
+      setLoading(false);
+      setError(errorFa.incomplete_date_window);
+      return;
+    }
+    if (dateFrom && dateTo && dateFrom > dateTo) {
+      setLoading(false);
+      setError(errorFa.invalid_date_window);
+      return;
+    }
+
+    let timeFrom: string | null = null;
+    let timeTo: string | null = null;
+    if (useTimeWindow) {
+      timeFrom = `${pad2(fromHour)}:${pad2(fromMinute)}`;
+      timeTo = `${pad2(toHour)}:${pad2(toMinute)}`;
+      if (timeFrom > timeTo) {
+        setLoading(false);
+        setError(errorFa.invalid_time_window);
+        return;
+      }
+    }
 
     let expiresAt: string | null = null;
     if (expiryDate) {
@@ -152,6 +253,10 @@ export default function CreateInvite({
           inviteText: inviteText.trim() || DEFAULT_INVITE_TEXT,
           expiresAt,
           optionIds: selectedIds,
+          dateFrom: dateFrom || null,
+          dateTo: dateTo || null,
+          timeFrom,
+          timeTo,
         }),
       });
 
@@ -162,7 +267,7 @@ export default function CreateInvite({
         setResult(data);
         setName("");
         setInviteText("");
-        clearExpiry();
+        resetWindows();
         setSelectedIds(defaultSelectedIds(activeOptions));
         router.refresh();
       } else {
@@ -184,6 +289,9 @@ export default function CreateInvite({
       </button>
     );
   }
+
+  const datePickerClass =
+    "w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center outline-none focus:border-pink-500";
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm border border-zinc-100 space-y-4">
@@ -260,7 +368,114 @@ export default function CreateInvite({
 
         <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
           <div className="flex items-center justify-between">
-            <label className="text-xs text-zinc-400">انقضا (اختیاری)</label>
+            <label className="text-xs text-zinc-400">بازه تاریخ انتخاب (اختیاری)</label>
+            {(dateFrom || dateTo) && (
+              <button
+                type="button"
+                onClick={clearDateWindow}
+                className="text-xs text-pink-600 hover:underline"
+              >
+                پاک کردن
+              </button>
+            )}
+          </div>
+          <DatePicker
+            calendar={persian}
+            locale={persianFa}
+            value={dateFromLabel || undefined}
+            editable={false}
+            calendarPosition="bottom-center"
+            inputClass={datePickerClass}
+            containerClassName="w-full"
+            placeholder="از تاریخ"
+            onChange={(value) => {
+              if (!value || Array.isArray(value)) {
+                setDateFrom("");
+                setDateFromLabel("");
+                return;
+              }
+              setDateFromLabel(value.format("YYYY/MM/DD"));
+              setDateFrom(
+                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
+              );
+            }}
+          />
+          <DatePicker
+            calendar={persian}
+            locale={persianFa}
+            value={dateToLabel || undefined}
+            editable={false}
+            calendarPosition="bottom-center"
+            inputClass={datePickerClass}
+            containerClassName="w-full"
+            placeholder="تا تاریخ"
+            minDate={dateFrom || undefined}
+            onChange={(value) => {
+              if (!value || Array.isArray(value)) {
+                setDateTo("");
+                setDateToLabel("");
+                return;
+              }
+              setDateToLabel(value.format("YYYY/MM/DD"));
+              setDateTo(
+                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
+              );
+            }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+          <label className="flex items-center gap-2 text-xs text-zinc-500">
+            <input
+              type="checkbox"
+              checked={useTimeWindow}
+              onChange={(e) => setUseTimeWindow(e.target.checked)}
+            />
+            محدود کردن بازه ساعت
+          </label>
+          {useTimeWindow && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <p className="text-xs text-zinc-400 text-center">از ساعت</p>
+                <TimeStepper
+                  hour={fromHour}
+                  minute={fromMinute}
+                  onBumpHour={(d) => {
+                    const next = bumpClock(fromHour, fromMinute, d, 0);
+                    setFromHour(next.hour);
+                    setFromMinute(next.minute);
+                  }}
+                  onBumpMinute={(d) => {
+                    const next = bumpClock(fromHour, fromMinute, 0, d);
+                    setFromHour(next.hour);
+                    setFromMinute(next.minute);
+                  }}
+                />
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-zinc-400 text-center">تا ساعت</p>
+                <TimeStepper
+                  hour={toHour}
+                  minute={toMinute}
+                  onBumpHour={(d) => {
+                    const next = bumpClock(toHour, toMinute, d, 0);
+                    setToHour(next.hour);
+                    setToMinute(next.minute);
+                  }}
+                  onBumpMinute={(d) => {
+                    const next = bumpClock(toHour, toMinute, 0, d);
+                    setToHour(next.hour);
+                    setToMinute(next.minute);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-zinc-400">انقضای لینک (اختیاری)</label>
             {expiryDate && (
               <button
                 type="button"
@@ -278,7 +493,7 @@ export default function CreateInvite({
             value={expiryDateLabel || undefined}
             editable={false}
             calendarPosition="bottom-center"
-            inputClass="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center outline-none focus:border-pink-500"
+            inputClass={datePickerClass}
             containerClassName="w-full"
             placeholder="تاریخ انقضا"
             onChange={(value) => {
@@ -295,32 +510,20 @@ export default function CreateInvite({
           />
 
           {expiryDate && (
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-lg font-bold tabular-nums text-pink-600">
-                {pad2(hour)}:{pad2(minute)}
-              </p>
-              <div
-                dir="ltr"
-                className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3"
-              >
-                <TimeColumn
-                  value={pad2(hour)}
-                  label="ساعت"
-                  onInc={() => bumpHour(1)}
-                  onDec={() => bumpHour(-1)}
-                />
-                <span className="pb-5 text-2xl font-bold text-zinc-300">:</span>
-                <TimeColumn
-                  value={pad2(minute)}
-                  label="دقیقه"
-                  onInc={() => bumpMinute(1)}
-                  onDec={() => bumpMinute(-1)}
-                />
-              </div>
-              <p className="text-[11px] text-zinc-400">
-                {expiryDateLabel} — {pad2(hour)}:{pad2(minute)}
-              </p>
-            </div>
+            <TimeStepper
+              hour={hour}
+              minute={minute}
+              onBumpHour={(d) => {
+                const next = bumpClock(hour, minute, d, 0);
+                setHour(next.hour);
+                setMinute(next.minute);
+              }}
+              onBumpMinute={(d) => {
+                const next = bumpClock(hour, minute, 0, d);
+                setHour(next.hour);
+                setMinute(next.minute);
+              }}
+            />
           )}
         </div>
 
