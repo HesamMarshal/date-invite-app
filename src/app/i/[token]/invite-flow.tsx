@@ -309,7 +309,10 @@ export default function InviteFlow({ token, name, inviteText, existing }: Props)
           <p className="text-4xl font-bold tabular-nums text-pink-600 tracking-wide">
             {timeLabel}
           </p>
-          <div className="flex items-center gap-4 rounded-3xl border border-pink-100 bg-white px-6 py-5 shadow-sm">
+          <div
+            dir="ltr"
+            className="flex items-center gap-4 rounded-3xl border border-pink-100 bg-white px-6 py-5 shadow-sm"
+          >
             <TimeColumn
               value={pad2(hour)}
               label="ساعت"

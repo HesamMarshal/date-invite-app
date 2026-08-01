@@ -215,7 +215,10 @@ export default function CreateInvite({ appUrl }: { appUrl: string }) {
               <p className="text-lg font-bold tabular-nums text-pink-600">
                 {pad2(hour)}:{pad2(minute)}
               </p>
-              <div className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3">
+              <div
+                dir="ltr"
+                className="flex items-center gap-3 rounded-2xl border border-pink-100 bg-white px-4 py-3"
+              >
                 <TimeColumn
                   value={pad2(hour)}
                   label="ساعت"
