@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     windows
   );
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
+    process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
   const url = `${appUrl}/i/${token}`;
 
   return NextResponse.json({ token, url });

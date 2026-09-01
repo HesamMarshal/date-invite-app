@@ -23,7 +23,7 @@ export default async function AdminPage() {
   }
 
   const appUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://invite.hesammarshal.ir";
+    process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
 
   return (
     <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
