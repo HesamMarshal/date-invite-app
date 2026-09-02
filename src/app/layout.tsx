@@ -2,9 +2,11 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BiyaBaMan",
-  description: "با من سر قرار میای؟",
-  robots: "noindex, nofollow",
+  title: {
+    default: "BiyaBaMan",
+    template: "%s | BiyaBaMan",
+  },
+  description: "لینک دعوت‌نامه بفرست، جواب رو ببین — تجربه شوخ و فارسی برای دعوت به قرار.",
 };
 
 export const viewport: Viewport = {
