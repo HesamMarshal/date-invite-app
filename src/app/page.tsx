@@ -3,13 +3,19 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "BiyaBaMan — دعوت‌نامه برای قرار",
+    absolute: "بیا با من — دعوت‌نامه برای قرار",
   },
   description:
     "لینک دعوت‌نامه بفرست، جواب رو ببین. تجربه شوخ و فارسی برای دعوت به قرار — تاریخ، ساعت و غذا.",
 };
 
-function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
+function PrimaryLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
@@ -20,7 +26,13 @@ function PrimaryLink({ href, children }: { href: string; children: React.ReactNo
   );
 }
 
-function SecondaryLink({ href, children }: { href: string; children: React.ReactNode }) {
+function SecondaryLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
@@ -45,15 +57,27 @@ const steps = [
   {
     emoji: "💬",
     title: "جواب رو ببین",
-    text: "طرف مقابل تاریخ، ساعت و غذا رو انتخاب می‌کنه — تو همون لحظه خبرت می‌شه.",
+    text: "طرف مقابل تاریخ، ساعت و غذا رو انتخاب می‌کنه — تو همون لحظه خبر می‌شه.",
   },
 ];
 
 const features = [
   { emoji: "📱", title: "مخصوص موبایل", text: "طراحی ساده و روان برای گوشی" },
-  { emoji: "🔒", title: "لینک خصوصی", text: "هر دعوت‌نامه لینک مخصوص خودش رو داره" },
-  { emoji: "😄", title: "شوخ و فارسی", text: "تجربه‌ای دوستانه، نه فرم خشک و رسمی" },
-  { emoji: "✏️", title: "قابل تغییر", text: "اگه نظر عوض شد، می‌تونه دوباره جواب بده" },
+  {
+    emoji: "🔒",
+    title: "لینک خصوصی",
+    text: "هر دعوت‌نامه لینک مخصوص خودش رو داره",
+  },
+  {
+    emoji: "😄",
+    title: "شوخ و فارسی",
+    text: "تجربه‌ای دوستانه، نه فرم خشک و رسمی",
+  },
+  {
+    emoji: "✏️",
+    title: "قابل تغییر",
+    text: "اگه نظرش عوض شد، می‌تونه دوباره جواب بده",
+  },
 ];
 
 export default function Home() {
@@ -62,7 +86,7 @@ export default function Home() {
       <header className="sticky top-0 z-10 border-b border-zinc-100/80 bg-[#fafafa]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
           <Link href="/" className="text-xl font-bold text-zinc-900">
-            💌 BiyaBaMan
+            💌 بیا با من
           </Link>
           <nav className="flex items-center gap-2">
             <Link
@@ -90,7 +114,7 @@ export default function Home() {
             </h1>
             <p className="mx-auto max-w-lg text-lg leading-relaxed text-zinc-600">
               لینک دعوت‌نامه بفرست، جواب رو ببین. بدون دردسر، با حس شوخی —
-              تاریخ، ساعت و غذا رو طرف مقابل انتخاب می‌کنه و تو خبرت می‌شی.
+              تاریخ، ساعت و غذا رو طرف مقابل انتخاب می‌کنه و تو خبر می‌شی.
             </p>
           </div>
           <div className="animate-fade-in flex flex-col gap-3 sm:flex-row">
@@ -101,7 +125,9 @@ export default function Home() {
 
         <section className="border-y border-zinc-100 bg-white">
           <div className="mx-auto max-w-3xl px-6 py-16">
-            <h2 className="mb-10 text-center text-2xl font-bold">چطور کار می‌کنه؟</h2>
+            <h2 className="mb-10 text-center text-2xl font-bold">
+              چطور کار می‌کنه؟
+            </h2>
             <div className="grid gap-6 sm:grid-cols-3">
               {steps.map((step, i) => (
                 <div
@@ -111,7 +137,9 @@ export default function Home() {
                 >
                   <p className="mb-3 text-3xl">{step.emoji}</p>
                   <p className="mb-2 font-bold">{step.title}</p>
-                  <p className="text-sm leading-relaxed text-zinc-600">{step.text}</p>
+                  <p className="text-sm leading-relaxed text-zinc-600">
+                    {step.text}
+                  </p>
                 </div>
               ))}
             </div>
@@ -119,7 +147,9 @@ export default function Home() {
         </section>
 
         <section className="mx-auto max-w-3xl px-6 py-16">
-          <h2 className="mb-10 text-center text-2xl font-bold">چرا BiyaBaMan؟</h2>
+          <h2 className="mb-10 text-center text-2xl font-bold">
+            چرا بیا با من؟
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {features.map((f) => (
               <div
@@ -138,10 +168,12 @@ export default function Home() {
 
         <section className="bg-pink-50">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center">
-            <h2 className="text-2xl font-bold">آماده‌ای اولین دعوت‌نامه رو بسازی؟</h2>
+            <h2 className="text-2xl font-bold">
+              آماده‌ای اولین دعوت‌نامه رو بسازی؟
+            </h2>
             <p className="max-w-md text-zinc-600">
-              ثبت‌نام رایگانه. چند ثانیه طول می‌کشه — بعدش لینک اختصاصی می‌گیری و
-              می‌فرستی.
+              ثبت‌نام رایگانه. چند ثانیه طول می‌کشه — بعدش لینک اختصاصی می‌گیری
+              و می‌فرستی.
             </p>
             <PrimaryLink href="/signup">شروع کن</PrimaryLink>
           </div>
@@ -149,7 +181,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-zinc-100 py-8 text-center text-sm text-zinc-400">
-        <p>© {new Date().getFullYear()} BiyaBaMan</p>
+        <p>© {new Date().getFullYear()} بیا با من</p>
       </footer>
     </div>
   );

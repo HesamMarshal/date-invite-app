@@ -8,6 +8,7 @@ import {
   timeToMinutes,
   toAsciiDigits,
 } from "@/lib/datetime";
+import { isoToPersianPickerDate } from "@/lib/persian-picker";
 import DatePicker from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
@@ -339,8 +340,8 @@ export default function InviteFlow({
             value={dateLabel || undefined}
             editable={false}
             calendarPosition="bottom-center"
-            minDate={windows.dateFrom || undefined}
-            maxDate={windows.dateTo || undefined}
+            minDate={isoToPersianPickerDate(windows.dateFrom)}
+            maxDate={isoToPersianPickerDate(windows.dateTo)}
             inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
             containerClassName="w-full max-w-xs"
             placeholder="یک تاریخ انتخاب کن"

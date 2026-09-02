@@ -394,10 +394,16 @@ export default function CreateInvite({
                 setDateFromLabel("");
                 return;
               }
-              setDateFromLabel(value.format("YYYY/MM/DD"));
-              setDateFrom(
-                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
+              const label = value.format("YYYY/MM/DD");
+              const iso = toAsciiDigits(
+                value.convert(gregorian).format("YYYY-MM-DD")
               );
+              setDateFromLabel(label);
+              setDateFrom(iso);
+              if (dateTo && iso > dateTo) {
+                setDateTo("");
+                setDateToLabel("");
+              }
             }}
           />
           <DatePicker
@@ -409,7 +415,7 @@ export default function CreateInvite({
             inputClass={datePickerClass}
             containerClassName="w-full"
             placeholder="تا تاریخ"
-            minDate={dateFrom || undefined}
+            minDate={dateFromLabel || undefined}
             onChange={(value) => {
               if (!value || Array.isArray(value)) {
                 setDateTo("");
