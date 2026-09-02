@@ -2,12 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import DatePicker from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persianFa from "react-date-object/locales/persian_fa";
-import gregorian from "react-date-object/calendars/gregorian";
+import PersianDatePickerField from "@/components/persian-date-picker-field";
 import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
-import { buildSelectedDatetime, toAsciiDigits } from "@/lib/datetime";
+import { buildSelectedDatetime } from "@/lib/datetime";
 import {
   MAX_INVITE_OPTIONS,
   MIN_INVITE_OPTIONS,
@@ -379,53 +376,36 @@ export default function CreateInvite({
               </button>
             )}
           </div>
-          <DatePicker
-            calendar={persian}
-            locale={persianFa}
-            value={dateFromLabel || undefined}
-            editable={false}
-            calendarPosition="bottom-center"
-            inputClass={datePickerClass}
-            containerClassName="w-full"
+          <PersianDatePickerField
+            label={dateFromLabel}
             placeholder="از تاریخ"
-            onChange={(value) => {
-              if (!value || Array.isArray(value)) {
-                setDateFrom("");
-                setDateFromLabel("");
-                return;
-              }
-              const label = value.format("YYYY/MM/DD");
-              const iso = toAsciiDigits(
-                value.convert(gregorian).format("YYYY-MM-DD")
-              );
-              setDateFromLabel(label);
+            inputClass={datePickerClass}
+            onPick={(pickedLabel, iso) => {
+              setDateFromLabel(pickedLabel);
               setDateFrom(iso);
               if (dateTo && iso > dateTo) {
                 setDateTo("");
                 setDateToLabel("");
               }
             }}
+            onClear={() => {
+              setDateFrom("");
+              setDateFromLabel("");
+            }}
           />
-          <DatePicker
-            calendar={persian}
-            locale={persianFa}
-            value={dateToLabel || undefined}
-            editable={false}
-            calendarPosition="bottom-center"
-            inputClass={datePickerClass}
-            containerClassName="w-full"
+          <PersianDatePickerField
+            label={dateToLabel}
             placeholder="تا تاریخ"
-            minDate={dateFromLabel || undefined}
-            onChange={(value) => {
-              if (!value || Array.isArray(value)) {
-                setDateTo("");
-                setDateToLabel("");
-                return;
-              }
-              setDateToLabel(value.format("YYYY/MM/DD"));
-              setDateTo(
-                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
-              );
+            inputClass={datePickerClass}
+            minLabel={dateFromLabel}
+            minIso={dateFrom}
+            onPick={(pickedLabel, iso) => {
+              setDateToLabel(pickedLabel);
+              setDateTo(iso);
+            }}
+            onClear={() => {
+              setDateTo("");
+              setDateToLabel("");
             }}
           />
         </div>
@@ -493,25 +473,17 @@ export default function CreateInvite({
             )}
           </div>
 
-          <DatePicker
-            calendar={persian}
-            locale={persianFa}
-            value={expiryDateLabel || undefined}
-            editable={false}
-            calendarPosition="bottom-center"
-            inputClass={datePickerClass}
-            containerClassName="w-full"
+          <PersianDatePickerField
+            label={expiryDateLabel}
             placeholder="تاریخ انقضا"
-            onChange={(value) => {
-              if (!value || Array.isArray(value)) {
-                setExpiryDate("");
-                setExpiryDateLabel("");
-                return;
-              }
-              setExpiryDateLabel(value.format("YYYY/MM/DD"));
-              setExpiryDate(
-                toAsciiDigits(value.convert(gregorian).format("YYYY-MM-DD"))
-              );
+            inputClass={datePickerClass}
+            onPick={(pickedLabel, iso) => {
+              setExpiryDateLabel(pickedLabel);
+              setExpiryDate(iso);
+            }}
+            onClear={() => {
+              setExpiryDate("");
+              setExpiryDateLabel("");
             }}
           />
 

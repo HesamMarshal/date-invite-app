@@ -6,13 +6,11 @@ import {
   buildSelectedDatetime,
   clampMinutesToWindow,
   timeToMinutes,
-  toAsciiDigits,
 } from "@/lib/datetime";
-import { isoToPersianPickerDate } from "@/lib/persian-picker";
-import DatePicker from "react-multi-date-picker";
-import persian from "react-date-object/calendars/persian";
-import persianFa from "react-date-object/locales/persian_fa";
-import gregorian from "react-date-object/calendars/gregorian";
+import PersianDatePickerField from "@/components/persian-date-picker-field";
+import {
+  formatPersianDateWindow,
+} from "@/lib/persian-picker";
 
 type FoodOption = { id: number; emoji: string; label: string };
 
@@ -329,35 +327,25 @@ export default function InviteFlow({
           <h1 className="text-2xl font-bold">چه روزی؟</h1>
           {(windows.dateFrom || windows.dateTo) && (
             <p className="text-sm text-zinc-400">
-              {windows.dateFrom && windows.dateTo
-                ? `فقط بین ${windows.dateFrom} تا ${windows.dateTo}`
-                : null}
+              {formatPersianDateWindow(windows.dateFrom, windows.dateTo)}
             </p>
           )}
-          <DatePicker
-            calendar={persian}
-            locale={persianFa}
-            value={dateLabel || undefined}
-            editable={false}
-            calendarPosition="bottom-center"
-            minDate={isoToPersianPickerDate(windows.dateFrom)}
-            maxDate={isoToPersianPickerDate(windows.dateTo)}
+          <PersianDatePickerField
+            label={dateLabel}
+            placeholder="یک تاریخ انتخاب کن"
             inputClass="w-full max-w-xs rounded-2xl border border-zinc-300 bg-white px-6 py-4 text-center text-lg outline-none transition focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
             containerClassName="w-full max-w-xs"
-            placeholder="یک تاریخ انتخاب کن"
-            onChange={(value) => {
-              if (!value || Array.isArray(value)) {
-                setDate("");
-                setDateLabel("");
-                return;
-              }
-              const g = toAsciiDigits(
-                value.convert(gregorian).format("YYYY-MM-DD")
-              );
-              if (windows.dateFrom && g < windows.dateFrom) return;
-              if (windows.dateTo && g > windows.dateTo) return;
-              setDateLabel(value.format("YYYY/MM/DD"));
-              setDate(g);
+            minIso={windows.dateFrom}
+            maxIso={windows.dateTo}
+            onPick={(persianLabel, iso) => {
+              if (windows.dateFrom && iso < windows.dateFrom) return;
+              if (windows.dateTo && iso > windows.dateTo) return;
+              setDateLabel(persianLabel);
+              setDate(iso);
+            }}
+            onClear={() => {
+              setDate("");
+              setDateLabel("");
             }}
           />
           <Btn onClick={() => date && setStep("time")} disabled={!date}>
