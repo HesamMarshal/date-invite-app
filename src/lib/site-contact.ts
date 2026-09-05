@@ -18,8 +18,7 @@ const defaults: SiteContact = {
   brandFa: "بیا با من",
   brandEn: "BiyaBaMan",
   siteUrl: "https://biyabaman.ir",
-  address: "ایران، شیراز",
-  /** Required by Kavenegar — set CONTACT_LANDLINE in env if not filled here */
+  address: "فارس - صدرا - بلوار البرز - مجتمع خورشید صدرا - طبقه 6 واحد 21",
   landline: "",
   mobile: "09173918727",
   email: "info@biyabaman.ir",
