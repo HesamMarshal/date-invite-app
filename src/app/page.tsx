@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import MarketingShell from "@/components/marketing-shell";
 
 export const metadata: Metadata = {
   title: {
@@ -82,107 +83,86 @@ const features = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b border-zinc-100/80 bg-[#fafafa]/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="text-xl font-bold text-zinc-900">
-            💌 بیا با من
-          </Link>
-          <nav className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="rounded-full px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100"
-            >
-              ورود
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-full bg-pink-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-pink-600"
-            >
-              ثبت‌نام
-            </Link>
-          </nav>
+    <MarketingShell>
+      <section className="mx-auto flex max-w-3xl flex-col items-center gap-8 px-6 py-16 text-center sm:py-24">
+        <p className="animate-float text-6xl">💌</p>
+        <div className="animate-fade-in space-y-4">
+          <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
+            با من سر قرار میای؟
+          </h1>
+          <p className="mx-auto max-w-lg text-lg leading-relaxed text-zinc-600">
+            لینک دعوت‌نامه بفرست، جواب رو ببین. بدون دردسر، با حس شوخی — تاریخ،
+            ساعت و غذا رو طرف مقابل انتخاب می‌کنه و تو خبر می‌شی.
+          </p>
         </div>
-      </header>
+        <div className="animate-fade-in flex flex-col gap-3 sm:flex-row">
+          <PrimaryLink href="/signup">رایگان ثبت‌نام کن</PrimaryLink>
+          <SecondaryLink href="/login">ورود</SecondaryLink>
+        </div>
+      </section>
 
-      <main className="flex-1">
-        <section className="mx-auto flex max-w-3xl flex-col items-center gap-8 px-6 py-16 text-center sm:py-24">
-          <p className="animate-float text-6xl">💌</p>
-          <div className="animate-fade-in space-y-4">
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
-              با من سر قرار میای؟
-            </h1>
-            <p className="mx-auto max-w-lg text-lg leading-relaxed text-zinc-600">
-              لینک دعوت‌نامه بفرست، جواب رو ببین. بدون دردسر، با حس شوخی —
-              تاریخ، ساعت و غذا رو طرف مقابل انتخاب می‌کنه و تو خبر می‌شی.
-            </p>
-          </div>
-          <div className="animate-fade-in flex flex-col gap-3 sm:flex-row">
-            <PrimaryLink href="/signup">رایگان ثبت‌نام کن</PrimaryLink>
-            <SecondaryLink href="/login">ورود</SecondaryLink>
-          </div>
-        </section>
-
-        <section className="border-y border-zinc-100 bg-white">
-          <div className="mx-auto max-w-3xl px-6 py-16">
-            <h2 className="mb-10 text-center text-2xl font-bold">
-              چطور کار می‌کنه؟
-            </h2>
-            <div className="grid gap-6 sm:grid-cols-3">
-              {steps.map((step, i) => (
-                <div
-                  key={step.title}
-                  className="animate-fade-in rounded-2xl border border-zinc-100 bg-zinc-50 p-6 text-center"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
-                  <p className="mb-3 text-3xl">{step.emoji}</p>
-                  <p className="mb-2 font-bold">{step.title}</p>
-                  <p className="text-sm leading-relaxed text-zinc-600">
-                    {step.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl px-6 py-16">
+      <section className="border-y border-zinc-100 bg-white">
+        <div className="mx-auto max-w-3xl px-6 py-16">
           <h2 className="mb-10 text-center text-2xl font-bold">
-            چرا بیا با من؟
+            چطور کار می‌کنه؟
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {features.map((f) => (
+          <div className="grid gap-6 sm:grid-cols-3">
+            {steps.map((step, i) => (
               <div
-                key={f.title}
-                className="flex items-start gap-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
+                key={step.title}
+                className="animate-fade-in rounded-2xl border border-zinc-100 bg-zinc-50 p-6 text-center"
+                style={{ animationDelay: `${i * 80}ms` }}
               >
-                <span className="text-2xl">{f.emoji}</span>
-                <div>
-                  <p className="font-bold">{f.title}</p>
-                  <p className="mt-1 text-sm text-zinc-600">{f.text}</p>
-                </div>
+                <p className="mb-3 text-3xl">{step.emoji}</p>
+                <p className="mb-2 font-bold">{step.title}</p>
+                <p className="text-sm leading-relaxed text-zinc-600">
+                  {step.text}
+                </p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="bg-pink-50">
-          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center">
-            <h2 className="text-2xl font-bold">
-              آماده‌ای اولین دعوت‌نامه رو بسازی؟
-            </h2>
-            <p className="max-w-md text-zinc-600">
-              ثبت‌نام رایگانه. چند ثانیه طول می‌کشه — بعدش لینک اختصاصی می‌گیری
-              و می‌فرستی.
-            </p>
-            <PrimaryLink href="/signup">شروع کن</PrimaryLink>
-          </div>
-        </section>
-      </main>
+      <section className="mx-auto max-w-3xl px-6 py-16">
+        <h2 className="mb-10 text-center text-2xl font-bold">چرا بیا با من؟</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="flex items-start gap-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
+            >
+              <span className="text-2xl">{f.emoji}</span>
+              <div>
+                <p className="font-bold">{f.title}</p>
+                <p className="mt-1 text-sm text-zinc-600">{f.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <footer className="border-t border-zinc-100 py-8 text-center text-sm text-zinc-400">
-        <p>© {new Date().getFullYear()} بیا با من</p>
-      </footer>
-    </div>
+      <section className="bg-pink-50">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 py-16 text-center">
+          <h2 className="text-2xl font-bold">
+            آماده‌ای اولین دعوت‌نامه رو بسازی؟
+          </h2>
+          <p className="max-w-md text-zinc-600">
+            ثبت‌نام رایگانه. چند ثانیه طول می‌کشه — بعدش لینک اختصاصی می‌گیری و
+            می‌فرستی.
+          </p>
+          <PrimaryLink href="/signup">شروع کن</PrimaryLink>
+          <p className="text-sm text-zinc-500">
+            سوالی داری؟{" "}
+            <Link
+              href="/contact"
+              className="font-bold text-pink-600 hover:underline"
+            >
+              با ما تماس بگیر
+            </Link>
+          </p>
+        </div>
+      </section>
+    </MarketingShell>
   );
 }
