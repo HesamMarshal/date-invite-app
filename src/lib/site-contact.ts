@@ -35,7 +35,8 @@ export function getSiteContact(): SiteContact {
   return {
     brandFa: defaults.brandFa,
     brandEn: defaults.brandEn,
-    siteUrl: pick("NEXT_PUBLIC_APP_URL", defaults.siteUrl).replace(/\/$/, ""),
+    // Always the public brand domain (not NEXT_PUBLIC_APP_URL — that is localhost in local .env)
+    siteUrl: defaults.siteUrl,
     address: pick("CONTACT_ADDRESS", defaults.address),
     landline: pick("CONTACT_LANDLINE", defaults.landline),
     mobile: pick("CONTACT_MOBILE", defaults.mobile),

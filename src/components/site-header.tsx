@@ -12,7 +12,7 @@ export default function SiteHeader() {
             href="/contact"
             className="rounded-full px-3 py-2 text-sm font-bold text-zinc-600 transition hover:bg-zinc-100 sm:px-4"
           >
-            تماس با ما
+            ارتباط با ما
           </Link>
           <Link
             href="/login"

@@ -7,8 +7,7 @@ import {
 
 export const metadata: Metadata = {
   title: "ارتباط با ما",
-  description:
-    "راه‌های تماس با بیا با من — آدرس، تلفن ثابت، موبایل و ایمیل.",
+  description: "راه‌های تماس با بیا با من — آدرس، موبایل و ایمیل.",
 };
 
 export default function ContactPage() {
@@ -35,24 +34,19 @@ export default function ContactPage() {
             <dt className="text-sm font-bold text-zinc-500">آدرس</dt>
             <dd className="mt-1 text-zinc-900">{c.address}</dd>
           </div>
-          <div>
-            <dt className="text-sm font-bold text-zinc-500">تلفن ثابت</dt>
-            <dd className="mt-1 text-zinc-900" dir="ltr">
-              {c.landline ? (
+          {c.landline ? (
+            <div>
+              <dt className="text-sm font-bold text-zinc-500">تلفن ثابت</dt>
+              <dd className="mt-1 text-zinc-900" dir="ltr">
                 <a
                   href={`tel:${c.landline.replace(/\s/g, "")}`}
                   className="underline-offset-2 hover:underline"
                 >
                   {c.landline}
                 </a>
-              ) : (
-                <span className="text-amber-700">
-                  در حال تکمیل — پس از ثبت شماره در پنل/محیط، اینجا نمایش داده
-                  می‌شود.
-                </span>
-              )}
-            </dd>
-          </div>
+              </dd>
+            </div>
+          ) : null}
           <div>
             <dt className="text-sm font-bold text-zinc-500">موبایل</dt>
             <dd className="mt-1 text-zinc-900" dir="ltr">
