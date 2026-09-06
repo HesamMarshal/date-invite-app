@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
+import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
 import CopyButton from "@/components/copy-button";
@@ -8,13 +8,13 @@ import LogoutButton from "./logout-button";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  let invites: Awaited<ReturnType<typeof getAllInvitationsWithResponses>> = [];
+  let invites: Awaited<ReturnType<typeof getInvitationsWithResponses>> = [];
   let activeOptions: Awaited<ReturnType<typeof listInviteOptions>> = [];
   let dbError = false;
 
   try {
     [invites, activeOptions] = await Promise.all([
-      getAllInvitationsWithResponses(),
+      getInvitationsWithResponses(),
       listInviteOptions(true),
     ]);
   } catch {

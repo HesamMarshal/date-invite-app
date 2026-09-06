@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth-guards";
-import { getInvitationsForUser } from "@/lib/invite-queries";
+import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import {
   countActiveInvitesForUser,
   countMonthlyCreatesForUser,
@@ -47,13 +47,13 @@ export default async function DashboardPage() {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
 
-  let invites: Awaited<ReturnType<typeof getInvitationsForUser>> = [];
+  let invites: Awaited<ReturnType<typeof getInvitationsWithResponses>> = [];
   let activeCount = 0;
   let monthlyCount = 0;
   let dbError = false;
   try {
     [invites, activeCount, monthlyCount] = await Promise.all([
-      getInvitationsForUser(user.id),
+      getInvitationsWithResponses(user.id),
       countActiveInvitesForUser(user.id),
       countMonthlyCreatesForUser(user.id),
     ]);

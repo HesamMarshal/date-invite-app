@@ -37,6 +37,35 @@ export interface InviteResponse {
   updated_at: string;
 }
 
+export interface InvitationWithResponse extends Invitation {
+  accepted: number | null;
+  selected_datetime: string | null;
+  food_choice: string | null;
+  response_updated_at: string | null;
+}
+
+function mapInvitationRow(row: RowDataPacket): Invitation {
+  return {
+    ...(row as Invitation),
+    id: Number(row.id),
+    user_id: row.user_id != null ? Number(row.user_id) : null,
+    is_active: !!row.is_active,
+    deleted_at: row.deleted_at ?? null,
+  };
+}
+
+function mapInvitationWithResponse(
+  row: RowDataPacket
+): InvitationWithResponse {
+  return {
+    ...mapInvitationRow(row),
+    accepted: row.accepted == null ? null : Number(row.accepted),
+    selected_datetime: row.selected_datetime ?? null,
+    food_choice: row.food_choice ?? null,
+    response_updated_at: row.response_updated_at ?? null,
+  };
+}
+
 export async function getInvitationByToken(
   token: string
 ): Promise<Invitation | null> {
@@ -48,13 +77,7 @@ export async function getInvitationByToken(
     [token]
   );
   const row = rows[0];
-  if (!row) return null;
-  return {
-    ...(row as Invitation),
-    id: Number(row.id),
-    is_active: !!row.is_active,
-    deleted_at: null,
-  };
+  return row ? mapInvitationRow(row) : null;
 }
 
 export async function recordOpen(id: number): Promise<void> {
@@ -98,17 +121,16 @@ export async function upsertResponse(
   );
 }
 
-export interface InvitationWithResponse extends Invitation {
-  accepted: number | null;
-  selected_datetime: string | null;
-  food_choice: string | null;
-  response_updated_at: string | null;
-}
-
-export async function getAllInvitationsWithResponses(): Promise<
-  InvitationWithResponse[]
-> {
+/**
+ * List invites + latest response.
+ * Pass `userId` to scope to that owner (dashboard).
+ * Omit `userId` for super-admin (all owners).
+ */
+export async function getInvitationsWithResponses(
+  userId?: number
+): Promise<InvitationWithResponse[]> {
   const pool = getPool();
+  const scoped = userId != null;
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT i.*,
             r.accepted,
@@ -118,39 +140,11 @@ export async function getAllInvitationsWithResponses(): Promise<
        FROM invitations i
        LEFT JOIN responses r ON r.invitation_id = i.id
       WHERE i.deleted_at IS NULL
-      ORDER BY i.created_at DESC`
-  );
-  return rows as InvitationWithResponse[];
-}
-
-/** Invites owned by this user (dashboard). */
-export async function getInvitationsForUser(
-  userId: number
-): Promise<InvitationWithResponse[]> {
-  const pool = getPool();
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT i.*,
-            r.accepted,
-            r.selected_datetime,
-            r.food_choice,
-            r.updated_at AS response_updated_at
-       FROM invitations i
-       LEFT JOIN responses r ON r.invitation_id = i.id
-      WHERE i.user_id = ?
-        AND i.deleted_at IS NULL
+        ${scoped ? "AND i.user_id = ?" : ""}
       ORDER BY i.created_at DESC`,
-    [userId]
+    scoped ? [userId] : []
   );
-  return rows as InvitationWithResponse[];
-}
-
-function mapInvitationRow(row: RowDataPacket): Invitation {
-  return {
-    ...(row as Invitation),
-    id: Number(row.id),
-    is_active: !!row.is_active,
-    deleted_at: row.deleted_at ?? null,
-  };
+  return rows.map(mapInvitationWithResponse);
 }
 
 /** Owned invite that is not soft-deleted; null if missing or wrong owner. */
@@ -239,13 +233,18 @@ export async function createInvitation(
   }
 }
 
-export async function deleteInvitation(id: number): Promise<boolean> {
-  // Hard delete — not exposed in product UI (D14). Reserved for future
-  // super-admin abuse purge only.
+/**
+ * Hard delete owned invite. Not exposed in product UI (D14).
+ * Always requires `userId` — never delete by id alone.
+ */
+export async function deleteInvitation(
+  id: number,
+  userId: number
+): Promise<boolean> {
   const pool = getPool();
   const [result] = await pool.query<ResultSetHeader>(
-    "DELETE FROM invitations WHERE id = ?",
-    [id]
+    "DELETE FROM invitations WHERE id = ? AND user_id = ?",
+    [id, userId]
   );
   return result.affectedRows > 0;
 }
