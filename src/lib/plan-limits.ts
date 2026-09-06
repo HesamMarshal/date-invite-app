@@ -19,6 +19,8 @@ export async function countActiveInvitesForUser(
     `SELECT COUNT(*) AS c
        FROM invitations
       WHERE user_id = ?
+        AND is_active = 1
+        AND deleted_at IS NULL
         AND (expires_at IS NULL OR expires_at > NOW())`,
     [userId]
   );

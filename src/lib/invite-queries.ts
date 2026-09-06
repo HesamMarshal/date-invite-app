@@ -15,6 +15,8 @@ export interface Invitation {
   date_to: string | Date | null;
   time_from: string | null;
   time_to: string | null;
+  is_active: boolean;
+  deleted_at: string | null;
   created_at: string;
 }
 
@@ -129,6 +131,50 @@ export async function getInvitationsForUser(
     [userId]
   );
   return rows as InvitationWithResponse[];
+}
+
+function mapInvitationRow(row: RowDataPacket): Invitation {
+  return {
+    ...(row as Invitation),
+    id: Number(row.id),
+    is_active: !!row.is_active,
+    deleted_at: row.deleted_at ?? null,
+  };
+}
+
+/** Owned invite that is not soft-deleted; null if missing or wrong owner. */
+export async function getInvitationOwnedByUser(
+  id: number,
+  userId: number
+): Promise<Invitation | null> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT * FROM invitations
+      WHERE id = ? AND user_id = ? AND deleted_at IS NULL
+      LIMIT 1`,
+    [id, userId]
+  );
+  const row = rows[0];
+  return row ? mapInvitationRow(row) : null;
+}
+
+/**
+ * Set is_active for an owned invite.
+ * Returns false if not found / not owned / soft-deleted.
+ */
+export async function setInvitationActiveForUser(
+  id: number,
+  userId: number,
+  isActive: boolean
+): Promise<boolean> {
+  const pool = getPool();
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE invitations
+        SET is_active = ?
+      WHERE id = ? AND user_id = ? AND deleted_at IS NULL`,
+    [isActive ? 1 : 0, id, userId]
+  );
+  return result.affectedRows > 0;
 }
 
 function generateToken(length = 16): string {
