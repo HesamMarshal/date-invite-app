@@ -3,8 +3,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth-guards";
 import { getInvitationsForUser } from "@/lib/invite-queries";
+import {
+  countActiveInvitesForUser,
+  countMonthlyCreatesForUser,
+  FREE_MAX_ACTIVE_INVITES,
+  FREE_MAX_MONTHLY_CREATES,
+} from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
 import LogoutButton from "./logout-button";
+import InviteActiveToggle from "./invite-active-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -41,9 +48,15 @@ export default async function DashboardPage() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
 
   let invites: Awaited<ReturnType<typeof getInvitationsForUser>> = [];
+  let activeCount = 0;
+  let monthlyCount = 0;
   let dbError = false;
   try {
-    invites = await getInvitationsForUser(user.id);
+    [invites, activeCount, monthlyCount] = await Promise.all([
+      getInvitationsForUser(user.id),
+      countActiveInvitesForUser(user.id),
+      countMonthlyCreatesForUser(user.id),
+    ]);
   } catch {
     dbError = true;
   }
@@ -63,6 +76,12 @@ export default async function DashboardPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">سلام {name} 👋</h1>
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
+        {user.plan_tier === "free" && !dbError && (
+          <p className="text-xs text-zinc-400">
+            {activeCount} از {FREE_MAX_ACTIVE_INVITES} فعال · {monthlyCount} از{" "}
+            {FREE_MAX_MONTHLY_CREATES} ساخت این ماه
+          </p>
+        )}
       </div>
 
       <Link
@@ -86,16 +105,27 @@ export default async function DashboardPage() {
         {invites.map((inv) => {
           const status = inviteStatus(inv);
           const url = `${appUrl}/i/${inv.token}`;
+          const isActive = !!inv.is_active;
 
           return (
             <div
               key={inv.id}
-              className="space-y-3 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
+              className={`space-y-3 rounded-2xl border p-5 shadow-sm ${
+                isActive
+                  ? "border-zinc-100 bg-white"
+                  : "border-zinc-200 bg-zinc-50 opacity-90"
+              }`}
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="text-lg font-bold">{inv.recipient_name}</span>
                 <span className="text-sm">{STATUS_LABEL[status]}</span>
               </div>
+
+              {!isActive && (
+                <p className="text-xs font-medium text-amber-700">
+                  لینک غیرفعال است — مهمون نمی‌تونه جواب بده
+                </p>
+              )}
 
               <p className="text-sm text-zinc-500">
                 {inv.recipient_name}، {inv.invite_text}
@@ -144,6 +174,8 @@ export default async function DashboardPage() {
                 />
                 <CopyButton text={url} />
               </div>
+
+              <InviteActiveToggle id={inv.id} isActive={isActive} />
             </div>
           );
         })}

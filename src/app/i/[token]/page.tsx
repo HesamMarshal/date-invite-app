@@ -18,15 +18,20 @@ export default async function InvitePage({ params }: Props) {
   const invite = await getInvitationByToken(token);
   if (!invite) notFound();
 
+  if (!invite.is_active) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+        <p className="text-5xl">💤</p>
+        <p className="text-xl font-bold">این دعوت فعلاً غیرفعاله</p>
+        <p className="max-w-xs text-sm text-zinc-500">
+          لینک هنوز همونه؛ وقتی دوباره فعال بشه می‌تونی جواب بدی.
+        </p>
+      </main>
+    );
+  }
+
   const expired =
     invite.expires_at !== null && new Date(invite.expires_at) < new Date();
-
-  await recordOpen(invite.id);
-
-  const [existing, foodOptions] = await Promise.all([
-    getResponseByInvitationId(invite.id),
-    getOptionsForInvitation(invite.id),
-  ]);
 
   if (expired) {
     return (
@@ -37,6 +42,13 @@ export default async function InvitePage({ params }: Props) {
       </main>
     );
   }
+
+  await recordOpen(invite.id);
+
+  const [existing, foodOptions] = await Promise.all([
+    getResponseByInvitationId(invite.id),
+    getOptionsForInvitation(invite.id),
+  ]);
 
   return (
     <InviteFlow

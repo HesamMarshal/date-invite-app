@@ -42,10 +42,19 @@ export async function getInvitationByToken(
 ): Promise<Invitation | null> {
   const pool = getPool();
   const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM invitations WHERE token = ? LIMIT 1",
+    `SELECT * FROM invitations
+      WHERE token = ? AND deleted_at IS NULL
+      LIMIT 1`,
     [token]
   );
-  return (rows[0] as Invitation) ?? null;
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    ...(row as Invitation),
+    id: Number(row.id),
+    is_active: !!row.is_active,
+    deleted_at: null,
+  };
 }
 
 export async function recordOpen(id: number): Promise<void> {
@@ -108,6 +117,7 @@ export async function getAllInvitationsWithResponses(): Promise<
             r.updated_at AS response_updated_at
        FROM invitations i
        LEFT JOIN responses r ON r.invitation_id = i.id
+      WHERE i.deleted_at IS NULL
       ORDER BY i.created_at DESC`
   );
   return rows as InvitationWithResponse[];
@@ -127,6 +137,7 @@ export async function getInvitationsForUser(
        FROM invitations i
        LEFT JOIN responses r ON r.invitation_id = i.id
       WHERE i.user_id = ?
+        AND i.deleted_at IS NULL
       ORDER BY i.created_at DESC`,
     [userId]
   );
@@ -229,6 +240,8 @@ export async function createInvitation(
 }
 
 export async function deleteInvitation(id: number): Promise<boolean> {
+  // Hard delete — not exposed in product UI (D14). Reserved for future
+  // super-admin abuse purge only.
   const pool = getPool();
   const [result] = await pool.query<ResultSetHeader>(
     "DELETE FROM invitations WHERE id = ?",

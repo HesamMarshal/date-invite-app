@@ -48,6 +48,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  if (!invite.is_active) {
+    return NextResponse.json({ error: "inactive" }, { status: 403 });
+  }
+
   if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
     return NextResponse.json({ error: "expired" }, { status: 410 });
   }
