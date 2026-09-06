@@ -8,34 +8,21 @@ import { checkCreateLimits } from "@/lib/plan-limits";
  * Create invite (user-scoped).
  * - Verified Telegram user → `user_id` = session user; caps from `plan_types`
  * - Super-admin (`is_admin`) → skip quota
- * - Password-only admin (no user session) → 401 `telegram_required` (no orphan invites)
  */
 export async function POST(request: NextRequest) {
   const verified = await requireVerified();
   const admin = await requireAdmin();
 
-  let userId: number;
-  let planTier: string | null = null;
-  let skipLimits = false;
-
-  if (verified) {
-    userId = verified.id;
-    planTier = verified.plan_tier;
-    skipLimits = verified.is_admin;
-  } else if (admin?.via === "session") {
-    userId = admin.user.id;
-    skipLimits = true;
-  } else if (admin?.via === "password") {
-    return NextResponse.json(
-      { error: "telegram_required" },
-      { status: 401 }
-    );
-  } else {
+  if (!verified && !admin) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  if (!skipLimits && planTier) {
-    const limits = await checkCreateLimits(userId, planTier);
+  const user = verified ?? admin!;
+  const userId = user.id;
+  const skipLimits = !!user.is_admin;
+
+  if (!skipLimits) {
+    const limits = await checkCreateLimits(userId, user.plan_tier);
     if (!limits.ok) {
       return NextResponse.json({ error: limits.error }, { status: 403 });
     }

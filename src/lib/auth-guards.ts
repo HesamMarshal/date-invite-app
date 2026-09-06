@@ -2,7 +2,6 @@ import {
   getSessionUser,
   type SessionUser,
 } from "@/lib/session";
-import { isAdminPasswordAuthenticated } from "@/lib/admin-auth";
 
 export type { SessionUser };
 
@@ -21,23 +20,13 @@ export async function requireVerified(): Promise<SessionUser | null> {
   return user;
 }
 
-export type AdminAccess =
-  | { via: "session"; user: SessionUser }
-  | { via: "password" };
-
 /**
- * Super-admin access (9-7 interim):
- * - Telegram session with `users.is_admin = 1`, or
- * - Legacy `ADMIN_PASSWORD` cookie (`admin_session`)
+ * Super-admin (14-2): Telegram session with `users.is_admin = 1` only.
+ * ADMIN_PASSWORD gate removed.
  */
-export async function requireAdmin(): Promise<AdminAccess | null> {
+export async function requireAdmin(): Promise<SessionUser | null> {
   const user = await getSessionUser();
-  if (user?.is_admin) {
-    return { via: "session", user };
-  }
-  if (await isAdminPasswordAuthenticated()) {
-    return { via: "password" };
-  }
+  if (user?.is_admin) return user;
   return null;
 }
 

@@ -28,7 +28,19 @@ export default async function AdminPage() {
     <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/admin/users"
+            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
+          >
+            کاربران
+          </Link>
+          <Link
+            href="/admin/messages"
+            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
+          >
+            پیام‌ها
+          </Link>
           <Link
             href="/admin/plan-types"
             className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
@@ -39,7 +51,7 @@ export default async function AdminPage() {
             href="/admin/options"
             className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
           >
-            مدیریت گزینه‌ها
+            گزینه‌ها
           </Link>
           <LogoutButton />
         </div>

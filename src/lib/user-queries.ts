@@ -83,3 +83,39 @@ export async function upsertUserFromTelegram(
   }
   return user;
 }
+
+export type UserWithStats = DbUser & {
+  invite_count: number;
+  created_at: string | null;
+};
+
+export async function listUsersWithStats(): Promise<UserWithStats[]> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT u.id, u.email, u.phone, u.telegram_id, u.telegram_username,
+            u.display_name, u.is_admin, u.plan_tier, u.created_at,
+            COUNT(i.id) AS invite_count
+       FROM users u
+       LEFT JOIN invitations i
+         ON i.user_id = u.id AND i.deleted_at IS NULL
+      GROUP BY u.id
+      ORDER BY u.created_at DESC`
+  );
+  return rows.map((row) => ({
+    ...mapUser(row),
+    invite_count: Number(row.invite_count ?? 0),
+    created_at: row.created_at ? String(row.created_at) : null,
+  }));
+}
+
+export async function updateUserPlanTier(
+  userId: number,
+  planTier: string
+): Promise<boolean> {
+  const pool = getPool();
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE users SET plan_tier = ? WHERE id = ?`,
+    [planTier, userId]
+  );
+  return result.affectedRows > 0;
+}
