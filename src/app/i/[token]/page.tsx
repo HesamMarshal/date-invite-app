@@ -5,7 +5,9 @@ import {
   getResponseByInvitationId,
 } from "@/lib/invite-queries";
 import { getOptionsForInvitation } from "@/lib/option-queries";
+import { getPlanTierForUserId } from "@/lib/plan-limits";
 import { toDateOnly, toTimeHm } from "@/lib/datetime";
+import InviteBrandFooter from "@/components/invite-brand-footer";
 import InviteFlow from "./invite-flow";
 
 type Props = {
@@ -18,14 +20,20 @@ export default async function InvitePage({ params }: Props) {
   const invite = await getInvitationByToken(token);
   if (!invite) notFound();
 
+  const ownerPlan = await getPlanTierForUserId(invite.user_id ?? null);
+  const showBrand = ownerPlan !== "pro";
+
   if (!invite.is_active) {
     return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
-        <p className="text-5xl">💤</p>
-        <p className="text-xl font-bold">این دعوت فعلاً غیرفعاله</p>
-        <p className="max-w-xs text-sm text-zinc-500">
-          لینک هنوز همونه؛ وقتی دوباره فعال بشه می‌تونی جواب بدی.
-        </p>
+      <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-6">
+          <p className="text-5xl">💤</p>
+          <p className="text-xl font-bold">این دعوت فعلاً غیرفعاله</p>
+          <p className="max-w-xs text-sm text-zinc-500">
+            لینک هنوز همونه؛ وقتی دوباره فعال بشه می‌تونی جواب بدی.
+          </p>
+        </div>
+        <InviteBrandFooter show={showBrand} />
       </main>
     );
   }
@@ -35,10 +43,13 @@ export default async function InvitePage({ params }: Props) {
 
   if (expired) {
     return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
-        <p className="text-5xl">⏳</p>
-        <p className="text-xl font-bold">این دعوت منقضی شده</p>
-        <p className="text-sm text-zinc-500">دیگه نمیتونی جواب بدی 😔</p>
+      <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-6">
+          <p className="text-5xl">⏳</p>
+          <p className="text-xl font-bold">این دعوت منقضی شده</p>
+          <p className="text-sm text-zinc-500">دیگه نمیتونی جواب بدی 😔</p>
+        </div>
+        <InviteBrandFooter show={showBrand} />
       </main>
     );
   }
@@ -51,26 +62,31 @@ export default async function InvitePage({ params }: Props) {
   ]);
 
   return (
-    <InviteFlow
-      token={token}
-      name={invite.recipient_name}
-      inviteText={invite.invite_text}
-      foodOptions={foodOptions}
-      windows={{
-        dateFrom: toDateOnly(invite.date_from),
-        dateTo: toDateOnly(invite.date_to),
-        timeFrom: toTimeHm(invite.time_from),
-        timeTo: toTimeHm(invite.time_to),
-      }}
-      existing={
-        existing
-          ? {
-              accepted: !!existing.accepted,
-              selectedDatetime: existing.selected_datetime,
-              foodChoice: existing.food_choice,
-            }
-          : null
-      }
-    />
+    <div className="flex min-h-screen flex-col">
+      <div className="flex-1">
+        <InviteFlow
+          token={token}
+          name={invite.recipient_name}
+          inviteText={invite.invite_text}
+          foodOptions={foodOptions}
+          windows={{
+            dateFrom: toDateOnly(invite.date_from),
+            dateTo: toDateOnly(invite.date_to),
+            timeFrom: toTimeHm(invite.time_from),
+            timeTo: toTimeHm(invite.time_to),
+          }}
+          existing={
+            existing
+              ? {
+                  accepted: !!existing.accepted,
+                  selectedDatetime: existing.selected_datetime,
+                  foodChoice: existing.food_choice,
+                }
+              : null
+          }
+        />
+      </div>
+      <InviteBrandFooter show={showBrand} />
+    </div>
   );
 }

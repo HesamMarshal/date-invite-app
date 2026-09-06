@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { getSiteContact } from "@/lib/site-contact";
 
+/**
+ * Marketing footer (13-3 + 13-5-1): brand + optional public email only.
+ * No personal mobile / address / Telegram.
+ * Free-tier attribution always on marketing pages; Pro hide = guest invite only.
+ */
 export default function SiteFooter() {
   const contact = getSiteContact();
   const year = new Date().getFullYear();
@@ -11,38 +16,23 @@ export default function SiteFooter() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1 text-sm text-zinc-600">
             <p className="font-bold text-zinc-900">{contact.brandFa}</p>
-            <p>{contact.address}</p>
-            {contact.landline ? (
+            <p className="text-zinc-500" dir="ltr">
+              {contact.siteUrl.replace(/^https?:\/\//, "")}
+            </p>
+            {contact.email ? (
               <p>
-                تلفن ثابت:{" "}
+                ایمیل:{" "}
                 <a
-                  href={`tel:${contact.landline.replace(/\s/g, "")}`}
+                  href={`mailto:${contact.email}`}
                   className="text-zinc-800 underline-offset-2 hover:underline"
                   dir="ltr"
                 >
-                  {contact.landline}
+                  {contact.email}
                 </a>
               </p>
             ) : null}
-            <p>
-              موبایل:{" "}
-              <a
-                href={`tel:${contact.mobile.replace(/\s/g, "")}`}
-                className="text-zinc-800 underline-offset-2 hover:underline"
-                dir="ltr"
-              >
-                {contact.mobile}
-              </a>
-            </p>
-            <p>
-              ایمیل:{" "}
-              <a
-                href={`mailto:${contact.email}`}
-                className="text-zinc-800 underline-offset-2 hover:underline"
-                dir="ltr"
-              >
-                {contact.email}
-              </a>
+            <p className="pt-2 text-xs text-zinc-400">
+              ساخته‌شده با 💌 {contact.brandFa}
             </p>
           </div>
           <nav className="flex flex-col gap-2 text-sm font-bold text-zinc-700 sm:items-end">

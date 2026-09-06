@@ -51,6 +51,19 @@ export async function getPlanLimits(
   };
 }
 
+/** Owner plan_tier for an invitation (guest branding). Missing → free. */
+export async function getPlanTierForUserId(
+  userId: number | null | undefined
+): Promise<string> {
+  if (userId == null) return "free";
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT plan_tier FROM users WHERE id = ? LIMIT 1`,
+    [userId]
+  );
+  return String(rows[0]?.plan_tier || "free");
+}
+
 export async function createPlanType(
   slug: string,
   maxActive: number,

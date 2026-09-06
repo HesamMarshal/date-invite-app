@@ -1,7 +1,7 @@
 /**
- * Public contact block for «ارتباط با ما» (Kavenegar activation requirement).
- * Override via env on the server without a rebuild for address/phones/email
- * (except when you prefer committing the real values here).
+ * Public brand contact for marketing pages.
+ * Personal PII must stay empty in defaults — use env only if you intentionally
+ * publish a brand phone/address (not a personal one).
  */
 export type SiteContact = {
   brandFa: string;
@@ -18,11 +18,11 @@ const defaults: SiteContact = {
   brandFa: "بیا با من",
   brandEn: "BiyaBaMan",
   siteUrl: "https://biyabaman.ir",
-  address: "فارس - صدرا - بلوار البرز - مجتمع خورشید صدرا - طبقه 6 واحد 21",
+  address: "",
   landline: "",
-  mobile: "09173918727",
+  mobile: "",
   email: "info@biyabaman.ir",
-  telegram: "HesamMarshal",
+  telegram: "",
 };
 
 function pick(envKey: string, fallback: string): string {
@@ -34,7 +34,6 @@ export function getSiteContact(): SiteContact {
   return {
     brandFa: defaults.brandFa,
     brandEn: defaults.brandEn,
-    // Always the public brand domain (not NEXT_PUBLIC_APP_URL — that is localhost in local .env)
     siteUrl: defaults.siteUrl,
     address: pick("CONTACT_ADDRESS", defaults.address),
     landline: pick("CONTACT_LANDLINE", defaults.landline),

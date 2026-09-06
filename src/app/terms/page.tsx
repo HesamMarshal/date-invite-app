@@ -30,8 +30,9 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-bold text-zinc-900">۲. حساب کاربری</h2>
           <p>
-            برای ساخت دعوت‌نامه باید حساب بسازید و شماره موبایل خود را تأیید
-            کنید. شما مسئول حفظ دسترسی به حساب و لینک‌های دعوت‌نامه‌ای هستید که
+            برای ساخت دعوت‌نامه باید با{" "}
+            <strong className="font-bold text-zinc-800">تلگرام</strong> وارد
+            شوید. شما مسئول حفظ دسترسی به حساب و لینک‌های دعوت‌نامه‌ای هستید که
             می‌سازید.
           </p>
         </section>
@@ -48,9 +49,9 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-bold text-zinc-900">۴. محدودیت‌ها</h2>
           <p>
-            در طرح رایگان ممکن است سقف تعداد دعوت‌نامه فعال یا ماهانه اعمال شود.
-            سرویس «همان‌طور که هست» ارائه می‌شود و ممکن است گاهی قطع یا تغییر
-            کند.
+            در طرح رایگان سقف تعداد دعوت‌نامه فعال و ساخت ماهانه اعمال می‌شود
+            (جزئیات در پلن حساب شما). سرویس «همان‌طور که هست» ارائه می‌شود و ممکن
+            است گاهی قطع یا تغییر کند.
           </p>
         </section>
 
@@ -58,10 +59,27 @@ export default function TermsPage() {
           <h2 className="text-xl font-bold text-zinc-900">۵. تماس</h2>
           <p>
             سوالات را از صفحه{" "}
-            <Link href="/contact" className="font-bold text-pink-600 hover:underline">
+            <Link
+              href="/contact"
+              className="font-bold text-pink-600 hover:underline"
+            >
               ارتباط با ما
             </Link>{" "}
-            بفرستید.
+            بفرستید
+            {c.email ? (
+              <>
+                {" "}
+                یا به{" "}
+                <a
+                  href={`mailto:${c.email}`}
+                  className="font-bold text-pink-600 hover:underline"
+                  dir="ltr"
+                >
+                  {c.email}
+                </a>
+              </>
+            ) : null}
+            .
           </p>
         </section>
       </article>
