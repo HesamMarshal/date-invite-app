@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth-guards";
-import { createInvitation, deleteInvitation } from "@/lib/invite-queries";
+import { requireVerified } from "@/lib/auth-guards";
+import { createInvitation } from "@/lib/invite-queries";
 import { parseCreateInviteBody } from "@/lib/invite-create";
+import { checkFreeCreateLimits } from "@/lib/plan-limits";
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdmin())) {
+  const user = await requireVerified();
+  if (!user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const limits = await checkFreeCreateLimits(user.id, user.plan_tier);
+  if (!limits.ok) {
+    return NextResponse.json({ error: limits.error }, { status: 403 });
   }
 
   let body: Record<string, unknown>;
@@ -29,35 +36,11 @@ export async function POST(request: NextRequest) {
     parsed.expiresAt,
     parsed.optionIds,
     parsed.windows,
-    null
+    user.id
   );
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
   const url = `${appUrl}/i/${token}`;
 
   return NextResponse.json({ token, url });
-}
-
-export async function DELETE(request: NextRequest) {
-  if (!(await isAdmin())) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
-  }
-
-  const id = typeof body.id === "number" ? body.id : Number(body.id);
-  if (!Number.isInteger(id) || id <= 0) {
-    return NextResponse.json({ error: "invalid_id" }, { status: 400 });
-  }
-
-  const deleted = await deleteInvitation(id);
-  if (!deleted) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-
-  return NextResponse.json({ ok: true });
 }

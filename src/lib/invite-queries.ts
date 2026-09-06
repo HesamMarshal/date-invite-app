@@ -140,7 +140,8 @@ export async function createInvitation(
   inviteText: string,
   expiresAt: string | null,
   optionIds: number[],
-  windows: InviteWindowFields
+  windows: InviteWindowFields,
+  userId: number | null = null
 ): Promise<string> {
   const pool = getPool();
   const token = generateToken();
@@ -150,8 +151,8 @@ export async function createInvitation(
     const [result] = await conn.query<ResultSetHeader>(
       `INSERT INTO invitations
          (token, recipient_name, invite_text, expires_at,
-          date_from, date_to, time_from, time_to)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          date_from, date_to, time_from, time_to, user_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         token,
         recipientName,
@@ -161,6 +162,7 @@ export async function createInvitation(
         windows.dateTo,
         windows.timeFrom,
         windows.timeTo,
+        userId,
       ]
     );
     const invitationId = result.insertId;

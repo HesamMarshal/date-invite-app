@@ -65,6 +65,13 @@ export default async function DashboardPage() {
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
       </div>
 
+      <Link
+        href="/dashboard/new"
+        className="rounded-2xl border-2 border-dashed border-zinc-300 px-6 py-4 text-center text-zinc-500 transition hover:border-pink-400 hover:text-pink-600"
+      >
+        + ساخت دعوت‌نامه جدید
+      </Link>
+
       {dbError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
           خطا در اتصال به دیتابیس. تنظیمات محیطی رو چک کن.
@@ -72,12 +79,7 @@ export default async function DashboardPage() {
       )}
 
       {!dbError && invites.length === 0 && (
-        <p className="py-8 text-center text-zinc-400">
-          هنوز دعوت‌نامه‌ای نداری
-          <span className="mt-2 block text-xs">
-            ساخت دعوت‌نامه به‌زودی اینجاست
-          </span>
-        </p>
+        <p className="py-4 text-center text-zinc-400">هنوز دعوت‌نامه‌ای نداری</p>
       )}
 
       <div className="flex flex-col gap-4">
