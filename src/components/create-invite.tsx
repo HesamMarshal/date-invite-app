@@ -114,7 +114,7 @@ function bumpClock(
 
 export default function CreateInvite({
   activeOptions,
-  apiPath = "/api/admin/invite",
+  apiPath = "/api/invites",
   defaultOpen = false,
   afterCreateHref,
 }: {
@@ -172,6 +172,7 @@ export default function CreateInvite({
         invalid_time_window: "بازه ساعت درست نیست (از ≤ تا)",
         invalid_window: "بازه تاریخ/ساعت درست نیست",
         unauthorized: "اول با تلگرام وارد شو",
+        telegram_required: "برای ساخت دعوت با تلگرام وارد شو (ادمین پسورد کافی نیست)",
         limit_active: "حداکثر ۳ دعوت‌نامه فعال داری — یکی رو پاک کن یا صبر کن تا منقضی بشه",
         limit_monthly: "این ماه ۵ دعوت‌نامه ساختی — ماه بعد دوباره امتحان کن",
       }) as Record<string, string>,
