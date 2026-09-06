@@ -35,6 +35,9 @@ yarn-error.log*
 .env.*
 !.env.example
 
+# Server-only Passenger / redirects (never commit secrets via SetEnv)
+.htaccess
+
 # vercel
 .vercel
 
