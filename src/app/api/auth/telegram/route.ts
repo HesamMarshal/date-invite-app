@@ -27,6 +27,38 @@ function recordAttempt(ip: string) {
   }
 }
 
+type MysqlLikeError = {
+  code?: string;
+  errno?: number;
+  sqlMessage?: string;
+};
+
+function dbFailPayload(err: unknown): {
+  error: string;
+  code?: string;
+  errno?: number;
+} {
+  const e = err as MysqlLikeError;
+  // Safe codes only — never return sqlMessage / credentials to the client
+  if (e?.code === "ER_NO_SUCH_TABLE" || e?.errno === 1146) {
+    return { error: "db_schema", code: e.code, errno: e.errno };
+  }
+  if (
+    e?.code === "ECONNREFUSED" ||
+    e?.code === "ENOTFOUND" ||
+    e?.code === "ETIMEDOUT" ||
+    e?.code === "ER_ACCESS_DENIED_ERROR" ||
+    e?.errno === 1045 ||
+    e?.errno === 1049
+  ) {
+    return { error: "db_connect", code: e.code, errno: e.errno };
+  }
+  if (e?.code?.startsWith("ER_") || typeof e?.errno === "number") {
+    return { error: "db_error", code: e.code, errno: e.errno };
+  }
+  return { error: "server_error" };
+}
+
 /**
  * POST /api/auth/telegram
  * Body = Telegram Login Widget user object.
@@ -42,6 +74,13 @@ export async function POST(request: NextRequest) {
 
   if (!process.env.TELEGRAM_BOT_TOKEN?.trim()) {
     return NextResponse.json({ error: "config" }, { status: 503 });
+  }
+
+  if (
+    !process.env.DATABASE_NAME?.trim() ||
+    !process.env.DATABASE_USER?.trim()
+  ) {
+    return NextResponse.json({ error: "db_config" }, { status: 503 });
   }
 
   let body: Record<string, unknown>;
@@ -73,9 +112,11 @@ export async function POST(request: NextRequest) {
     });
     attachSessionCookie(response, sessionId);
     return response;
-  } catch {
-    // DB / unexpected — do not leak details
+  } catch (err) {
     recordAttempt(ip);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+    const payload = dbFailPayload(err);
+    // Log code only — never token, hash, or SQL with data
+    console.error("[auth/telegram]", payload.error, payload.code ?? "", payload.errno ?? "");
+    return NextResponse.json(payload, { status: 500 });
   }
 }

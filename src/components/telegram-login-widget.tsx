@@ -50,9 +50,16 @@ export default function TelegramLoginWidget({ botUsername }: Props) {
           };
           if (data.error === "rate_limited") {
             setError("زیاد تلاش کردی، یکم صبر کن.");
-          } else if (data.error === "config") {
+          } else if (data.error === "config" || data.error === "db_config") {
             setError("ورود با تلگرام روی سرور تنظیم نشده.");
-          } else if (data.error === "server_error") {
+          } else if (data.error === "db_schema") {
+            setError("دیتابیس ناقصه — install.sql رو روی دیتابیس فعلی اجرا کن.");
+          } else if (data.error === "db_connect") {
+            setError("اتصال به دیتابیس برقرار نشد. تنظیمات DATABASE_* رو چک کن.");
+          } else if (
+            data.error === "server_error" ||
+            data.error === "db_error"
+          ) {
             setError("خطای سرور. کمی بعد دوباره امتحان کن.");
           } else {
             setError("ورود انجام نشد. دوباره امتحان کن.");
