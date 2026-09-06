@@ -8,6 +8,11 @@ import {
   toTimeHm,
 } from "@/lib/datetime";
 
+/**
+ * Guest respond — public token contract unchanged (plan 10-7).
+ * Enforces: exists, not soft-deleted, is_active, not expired, windows/food.
+ * Owner plan_tier feature gates → step 12-2 (not here).
+ */
 const RATE_LIMIT = new Map<string, number>();
 const RATE_WINDOW = 60_000;
 const RATE_MAX = 10;

@@ -175,5 +175,6 @@ export const API_ERROR_FA: Record<string, string> = {
   missing_fields: "لطفاً تاریخ، ساعت و انتخاب غذا رو کامل کن",
   not_found: "لینک پیدا نشد",
   expired: "این دعوت منقضی شده",
+  inactive: "این دعوت فعلاً غیرفعاله",
   rate_limited: "زیاد تلاش کردی، یکم صبر کن",
 };
