@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getAllInvitationsWithResponses } from "@/lib/invite-queries";
 import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
-import CopyButtonClient from "./copy-button";
+import CopyButton from "@/components/copy-button";
 import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
@@ -136,7 +136,10 @@ export default async function AdminPage() {
                   value={url}
                   className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                 />
-                <CopyButtonClient text={url} />
+                <CopyButton
+                  text={url}
+                  shareTitle={`دعوت برای ${inv.recipient_name}`}
+                />
               </div>
             </div>
           );

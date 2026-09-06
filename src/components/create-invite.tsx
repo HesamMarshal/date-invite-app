@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import PersianDatePickerField from "@/components/persian-date-picker-field";
+import CopyButton from "@/components/copy-button";
 import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
 import { buildSelectedDatetime } from "@/lib/datetime";
 import {
@@ -278,9 +279,7 @@ export default function CreateInvite({
         resetWindows();
         setSelectedIds(defaultSelectedIds(activeOptions));
         router.refresh();
-        if (afterCreateHref) {
-          router.push(afterCreateHref);
-        }
+        // Stay on success screen so user can copy/share (dashboard: no auto-redirect)
       } else {
         setError(errorFa[data.error] || data.error || "خطایی رخ داد");
       }
@@ -307,6 +306,7 @@ export default function CreateInvite({
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm border border-zinc-100 space-y-4">
       <p className="font-bold">دعوت‌نامه جدید</p>
+      {!result && (
       <form onSubmit={handleCreate} className="flex flex-col gap-3">
         <input
           type="text"
@@ -539,20 +539,45 @@ export default function CreateInvite({
           </button>
         </div>
       </form>
+      )}
 
-      {error && (
+      {error && !result && (
         <p className="text-sm text-red-500 text-center">{error}</p>
       )}
 
       {result && (
-        <div className="rounded-xl bg-pink-50 p-4 space-y-2">
-          <p className="text-sm font-bold text-pink-700">✓ ساخته شد!</p>
-          <input
-            readOnly
-            value={result.url}
-            className="w-full rounded-xl border border-pink-200 bg-white px-3 py-2 text-sm outline-none"
-            onClick={(e) => (e.target as HTMLInputElement).select()}
-          />
+        <div className="space-y-3 rounded-xl bg-pink-50 p-4">
+          <p className="text-sm font-bold text-pink-700">✓ ساخته شد! لینک رو بفرست</p>
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={result.url}
+              className="flex-1 rounded-xl border border-pink-200 bg-white px-3 py-2 text-sm outline-none"
+              onClick={(e) => (e.target as HTMLInputElement).select()}
+            />
+            <CopyButton text={result.url} shareTitle="دعوت‌نامه بیا با من" />
+          </div>
+          {afterCreateHref && (
+            <button
+              type="button"
+              onClick={() => router.push(afterCreateHref)}
+              className="w-full rounded-full bg-pink-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-pink-600"
+            >
+              رفتن به داشبورد
+            </button>
+          )}
+          {!afterCreateHref && (
+            <button
+              type="button"
+              onClick={() => {
+                setResult(null);
+                setOpen(false);
+              }}
+              className="w-full rounded-full bg-zinc-200 px-6 py-3 text-sm font-bold transition hover:bg-zinc-300"
+            >
+              بستن
+            </button>
+          )}
         </div>
       )}
     </div>

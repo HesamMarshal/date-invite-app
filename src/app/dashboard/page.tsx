@@ -172,7 +172,10 @@ export default async function DashboardPage() {
                   value={url}
                   className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                 />
-                <CopyButton text={url} />
+                <CopyButton
+                  text={url}
+                  shareTitle={`دعوت برای ${inv.recipient_name}`}
+                />
               </div>
 
               <InviteActiveToggle id={inv.id} isActive={isActive} />
