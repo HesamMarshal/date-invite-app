@@ -17,16 +17,3 @@ PassengerAppType node
 PassengerStartupFile server.js
 PassengerAppLogFile "/home/hesammar/biyabaman.ir/www/logs/biyabaman-passenger.log"
 # DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
-<IfModule Litespeed>
-SetEnv ADMIN_PASSWORD Bghy1234@@
-SetEnv DATABASE_HOST localhost
-SetEnv DATABASE_NAME hesammar_inviteDb
-SetEnv DATABASE_PASSWORD f]c8%!7?\*C_yN;;W
-SetEnv DATABASE_USER hesammar_invite_user
-SetEnv NEXT_PUBLIC_APP_URL https://biyabaman.ir
-SetEnv NODE_ENV production
-SetEnv TELEGRAM_BOT_TOKEN 8897994613:AAHg5vzgSSO4mqhFu25By_78ICTbCWvznbQ
-SetEnv TELEGRAM_BOT_USERNAME biyabaman_bot
-</IfModule>
-# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
