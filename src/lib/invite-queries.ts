@@ -4,6 +4,7 @@ import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
 export interface Invitation {
   id: number;
+  user_id?: number | null;
   token: string;
   recipient_name: string;
   invite_text: string;
@@ -106,6 +107,26 @@ export async function getAllInvitationsWithResponses(): Promise<
        FROM invitations i
        LEFT JOIN responses r ON r.invitation_id = i.id
       ORDER BY i.created_at DESC`
+  );
+  return rows as InvitationWithResponse[];
+}
+
+/** Invites owned by this user (dashboard). */
+export async function getInvitationsForUser(
+  userId: number
+): Promise<InvitationWithResponse[]> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT i.*,
+            r.accepted,
+            r.selected_datetime,
+            r.food_choice,
+            r.updated_at AS response_updated_at
+       FROM invitations i
+       LEFT JOIN responses r ON r.invitation_id = i.id
+      WHERE i.user_id = ?
+      ORDER BY i.created_at DESC`,
+    [userId]
   );
   return rows as InvitationWithResponse[];
 }

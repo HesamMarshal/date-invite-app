@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth-guards";
+import { getInvitationsForUser } from "@/lib/invite-queries";
+import CopyButton from "@/components/copy-button";
 import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +13,23 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+function inviteStatus(inv: {
+  accepted: number | null;
+  open_count: number;
+}): "accepted" | "rejected" | "opened" | "unseen" {
+  if (inv.accepted === 1) return "accepted";
+  if (inv.accepted === 0) return "rejected";
+  if (inv.open_count > 0) return "opened";
+  return "unseen";
+}
+
+const STATUS_LABEL = {
+  accepted: "✅ قبول کرده",
+  rejected: "❌ رد کرده",
+  opened: "👀 باز کرده",
+  unseen: "🔗 باز نکرده",
+} as const;
+
 export default async function DashboardPage() {
   const user = await requireUser();
   if (!user) redirect("/login");
@@ -18,6 +37,16 @@ export default async function DashboardPage() {
   const name =
     user.display_name ||
     (user.telegram_username ? `@${user.telegram_username}` : "کاربر");
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
+
+  let invites: Awaited<ReturnType<typeof getInvitationsForUser>> = [];
+  let dbError = false;
+  try {
+    invites = await getInvitationsForUser(user.id);
+  } catch {
+    dbError = true;
+  }
 
   return (
     <main
@@ -33,27 +62,89 @@ export default async function DashboardPage() {
 
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">سلام {name} 👋</h1>
-        <p className="text-sm text-zinc-500">
-          وارد شدی. ساخت دعوت‌نامه از پنل کاربری به‌زودی اینجاست.
-        </p>
+        <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
       </div>
 
-      <div className="rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm space-y-2 text-sm text-zinc-600">
-        <p>
-          <span className="text-zinc-400">پلن:</span>{" "}
-          {user.plan_tier === "pro" ? "Pro" : "رایگان"}
+      {dbError && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
+          خطا در اتصال به دیتابیس. تنظیمات محیطی رو چک کن.
+        </div>
+      )}
+
+      {!dbError && invites.length === 0 && (
+        <p className="py-8 text-center text-zinc-400">
+          هنوز دعوت‌نامه‌ای نداری
+          <span className="mt-2 block text-xs">
+            ساخت دعوت‌نامه به‌زودی اینجاست
+          </span>
         </p>
-        {user.telegram_username && (
-          <p>
-            <span className="text-zinc-400">تلگرام:</span> @
-            {user.telegram_username}
-          </p>
-        )}
-        {!user.telegram_id && (
-          <p className="text-amber-700">
-            هویت تلگرام ناقصه — دوباره از ورود با تلگرام وارد شو.
-          </p>
-        )}
+      )}
+
+      <div className="flex flex-col gap-4">
+        {invites.map((inv) => {
+          const status = inviteStatus(inv);
+          const url = `${appUrl}/i/${inv.token}`;
+
+          return (
+            <div
+              key={inv.id}
+              className="space-y-3 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-lg font-bold">{inv.recipient_name}</span>
+                <span className="text-sm">{STATUS_LABEL[status]}</span>
+              </div>
+
+              <p className="text-sm text-zinc-500">
+                {inv.recipient_name}، {inv.invite_text}
+              </p>
+
+              {inv.open_count > 0 && (
+                <p className="text-xs text-zinc-400">
+                  {inv.open_count} بار باز شده
+                </p>
+              )}
+
+              {status === "accepted" && (
+                <div className="space-y-1 text-sm text-zinc-600">
+                  {inv.selected_datetime && (
+                    <>
+                      <p>
+                        📅{" "}
+                        {new Date(inv.selected_datetime).toLocaleDateString(
+                          "fa-IR",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
+                      </p>
+                      <p>
+                        🕐{" "}
+                        {new Date(inv.selected_datetime).toLocaleTimeString(
+                          "fa-IR",
+                          { hour: "2-digit", minute: "2-digit" }
+                        )}
+                      </p>
+                    </>
+                  )}
+                  {inv.food_choice && <p>🍽️ {inv.food_choice}</p>}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  readOnly
+                  value={url}
+                  className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
+                />
+                <CopyButton text={url} />
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {user.is_admin && (
