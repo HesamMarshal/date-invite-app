@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import { requireUser, requireVerified } from "@/lib/auth-guards";
 import { listInviteOptions } from "@/lib/option-queries";
 import {
-  checkFreeCreateLimits,
-  FREE_MAX_ACTIVE_INVITES,
-  FREE_MAX_MONTHLY_CREATES,
+  checkCreateLimits,
+  getPlanLimits,
 } from "@/lib/plan-limits";
 import CreateInvite from "@/components/create-invite";
 
@@ -46,14 +45,17 @@ export default async function DashboardNewInvitePage() {
 
   let activeOptions: Awaited<ReturnType<typeof listInviteOptions>> = [];
   let limitError: "limit_active" | "limit_monthly" | null = null;
+  let planLimits: Awaited<ReturnType<typeof getPlanLimits>> = null;
   let dbError = false;
 
   try {
-    const [opts, limits] = await Promise.all([
+    const [opts, limits, plan] = await Promise.all([
       listInviteOptions(true),
-      checkFreeCreateLimits(verified.id, verified.plan_tier),
+      checkCreateLimits(verified.id, verified.plan_tier),
+      getPlanLimits(verified.plan_tier),
     ]);
     activeOptions = opts;
+    planLimits = plan;
     if (!limits.ok) limitError = limits.error;
   } catch {
     dbError = true;
@@ -74,10 +76,10 @@ export default async function DashboardNewInvitePage() {
         <h1 className="text-lg font-bold">دعوت‌نامه جدید</h1>
       </div>
 
-      {verified.plan_tier === "free" && !limitError && (
+      {planLimits && !limitError && (
         <p className="text-center text-xs text-zinc-400">
-          پلن رایگان: تا {FREE_MAX_ACTIVE_INVITES} فعال و{" "}
-          {FREE_MAX_MONTHLY_CREATES} ساخت در ماه
+          تا {planLimits.max_active} فعال و {planLimits.max_monthly_creates}{" "}
+          ساخت در ماه
         </p>
       )}
 
@@ -89,15 +91,15 @@ export default async function DashboardNewInvitePage() {
 
       {limitError === "limit_active" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          حداکثر {FREE_MAX_ACTIVE_INVITES} دعوت‌نامه فعال داری. یکی رو پاک کن یا
-          صبر کن تا منقضی بشه.
+          حداکثر {planLimits?.max_active ?? "—"} دعوت‌نامه فعال داری. یکی رو
+          غیرفعال کن یا صبر کن تا منقضی بشه.
         </div>
       )}
 
       {limitError === "limit_monthly" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          این ماه {FREE_MAX_MONTHLY_CREATES} دعوت‌نامه ساختی. ماه بعد دوباره
-          امتحان کن.
+          این ماه {planLimits?.max_monthly_creates ?? "—"} دعوت‌نامه ساختی. ماه
+          بعد دوباره امتحان کن.
         </div>
       )}
 
@@ -111,6 +113,8 @@ export default async function DashboardNewInvitePage() {
           apiPath="/api/invites"
           defaultOpen
           afterCreateHref="/dashboard"
+          maxActive={planLimits?.max_active}
+          maxMonthly={planLimits?.max_monthly_creates}
         />
       )}
     </main>

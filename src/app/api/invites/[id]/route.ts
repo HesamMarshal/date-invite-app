@@ -6,7 +6,7 @@ import {
 } from "@/lib/invite-queries";
 import {
   countActiveInvitesForUser,
-  FREE_MAX_ACTIVE_INVITES,
+  getPlanLimits,
 } from "@/lib/plan-limits";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -40,10 +40,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  // Reactivating counts toward free active cap (monthly create is not checked).
-  if (isActive && !invite.is_active && user.plan_tier === "free") {
-    const active = await countActiveInvitesForUser(user.id);
-    if (active >= FREE_MAX_ACTIVE_INVITES) {
+  // Reactivating counts toward active cap (monthly create is not checked).
+  if (isActive && !invite.is_active && !user.is_admin) {
+    const [limits, active] = await Promise.all([
+      getPlanLimits(user.plan_tier),
+      countActiveInvitesForUser(user.id),
+    ]);
+    if (!limits || active >= limits.max_active) {
       return NextResponse.json({ error: "limit_active" }, { status: 403 });
     }
   }

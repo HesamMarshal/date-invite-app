@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export default function InviteActiveToggle({
   id,
   isActive,
+  maxActive,
 }: {
   id: number;
   isActive: boolean;
+  maxActive?: number;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,7 +29,11 @@ export default function InviteActiveToggle({
       if (res.ok) {
         router.refresh();
       } else if (data.error === "limit_active") {
-        setError("حداکثر ۳ دعوت فعال — یکی رو غیرفعال کن");
+        setError(
+          maxActive != null
+            ? `حداکثر ${maxActive} دعوت فعال — یکی رو غیرفعال کن`
+            : "به سقف دعوت فعال رسیدی — یکی رو غیرفعال کن"
+        );
       } else if (data.error === "unauthorized") {
         setError("اول وارد شو");
       } else {

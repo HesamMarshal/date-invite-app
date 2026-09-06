@@ -6,8 +6,7 @@ import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import {
   countActiveInvitesForUser,
   countMonthlyCreatesForUser,
-  FREE_MAX_ACTIVE_INVITES,
-  FREE_MAX_MONTHLY_CREATES,
+  getPlanLimits,
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
 import LogoutButton from "./logout-button";
@@ -50,12 +49,14 @@ export default async function DashboardPage() {
   let invites: Awaited<ReturnType<typeof getInvitationsWithResponses>> = [];
   let activeCount = 0;
   let monthlyCount = 0;
+  let planLimits: Awaited<ReturnType<typeof getPlanLimits>> = null;
   let dbError = false;
   try {
-    [invites, activeCount, monthlyCount] = await Promise.all([
+    [invites, activeCount, monthlyCount, planLimits] = await Promise.all([
       getInvitationsWithResponses(user.id),
       countActiveInvitesForUser(user.id),
       countMonthlyCreatesForUser(user.id),
+      getPlanLimits(user.plan_tier),
     ]);
   } catch {
     dbError = true;
@@ -76,10 +77,10 @@ export default async function DashboardPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">سلام {name} 👋</h1>
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
-        {user.plan_tier === "free" && !dbError && (
+        {planLimits && !dbError && (
           <p className="text-xs text-zinc-400">
-            {activeCount} از {FREE_MAX_ACTIVE_INVITES} فعال · {monthlyCount} از{" "}
-            {FREE_MAX_MONTHLY_CREATES} ساخت این ماه
+            {activeCount} از {planLimits.max_active} فعال · {monthlyCount} از{" "}
+            {planLimits.max_monthly_creates} ساخت این ماه
           </p>
         )}
       </div>
@@ -178,7 +179,11 @@ export default async function DashboardPage() {
                 />
               </div>
 
-              <InviteActiveToggle id={inv.id} isActive={isActive} />
+              <InviteActiveToggle
+                id={inv.id}
+                isActive={isActive}
+                maxActive={planLimits?.max_active}
+              />
             </div>
           );
         })}

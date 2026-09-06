@@ -16,7 +16,7 @@ export type SessionUser = {
   telegram_username: string | null;
   display_name: string | null;
   is_admin: boolean;
-  plan_tier: "free" | "pro";
+  plan_tier: string;
 };
 
 function newSessionId(): string {
@@ -94,7 +94,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     telegram_username: row.telegram_username ?? null,
     display_name: row.display_name ?? null,
     is_admin: !!row.is_admin,
-    plan_tier: row.plan_tier === "pro" ? "pro" : "free",
+    plan_tier: String(row.plan_tier || "free"),
   };
 }
 

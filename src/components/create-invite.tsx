@@ -117,6 +117,8 @@ export default function CreateInvite({
   apiPath = "/api/invites",
   defaultOpen = false,
   afterCreateHref,
+  maxActive,
+  maxMonthly,
 }: {
   activeOptions: OptionItem[];
   apiPath?: string;
@@ -124,6 +126,8 @@ export default function CreateInvite({
   defaultOpen?: boolean;
   /** Navigate here after success (dashboard flow). */
   afterCreateHref?: string;
+  maxActive?: number;
+  maxMonthly?: number;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [name, setName] = useState("");
@@ -173,10 +177,16 @@ export default function CreateInvite({
         invalid_window: "بازه تاریخ/ساعت درست نیست",
         unauthorized: "اول با تلگرام وارد شو",
         telegram_required: "برای ساخت دعوت با تلگرام وارد شو (ادمین پسورد کافی نیست)",
-        limit_active: "حداکثر ۳ دعوت‌نامه فعال داری — یکی رو پاک کن یا صبر کن تا منقضی بشه",
-        limit_monthly: "این ماه ۵ دعوت‌نامه ساختی — ماه بعد دوباره امتحان کن",
+        limit_active:
+          maxActive != null
+            ? `حداکثر ${maxActive} دعوت‌نامه فعال داری — یکی رو غیرفعال کن یا صبر کن تا منقضی بشه`
+            : "به سقف دعوت فعال رسیدی — یکی رو غیرفعال کن یا صبر کن تا منقضی بشه",
+        limit_monthly:
+          maxMonthly != null
+            ? `این ماه ${maxMonthly} دعوت‌نامه ساختی — ماه بعد دوباره امتحان کن`
+            : "این ماه به سقف ساخت دعوت رسیدی — ماه بعد دوباره امتحان کن",
       }) as Record<string, string>,
-    []
+    [maxActive, maxMonthly]
   );
 
   const clearDateWindow = () => {

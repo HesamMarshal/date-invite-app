@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, requireVerified } from "@/lib/auth-guards";
 import { createInvitation } from "@/lib/invite-queries";
 import { parseCreateInviteBody } from "@/lib/invite-create";
-import { checkFreeCreateLimits } from "@/lib/plan-limits";
+import { checkCreateLimits } from "@/lib/plan-limits";
 
 /**
  * Create invite (user-scoped).
- * - Verified Telegram user → `user_id` = session user; free limits unless Pro / is_admin
- * - Super-admin via Telegram (`is_admin`) → same, no free limits
+ * - Verified Telegram user → `user_id` = session user; caps from `plan_types`
+ * - Super-admin (`is_admin`) → skip quota
  * - Password-only admin (no user session) → 401 `telegram_required` (no orphan invites)
  */
 export async function POST(request: NextRequest) {
@@ -15,15 +15,16 @@ export async function POST(request: NextRequest) {
   const admin = await requireAdmin();
 
   let userId: number;
-  let skipFreeLimits = false;
+  let planTier: string | null = null;
+  let skipLimits = false;
 
   if (verified) {
     userId = verified.id;
-    skipFreeLimits =
-      verified.plan_tier === "pro" || verified.is_admin || admin !== null;
+    planTier = verified.plan_tier;
+    skipLimits = verified.is_admin;
   } else if (admin?.via === "session") {
     userId = admin.user.id;
-    skipFreeLimits = true;
+    skipLimits = true;
   } else if (admin?.via === "password") {
     return NextResponse.json(
       { error: "telegram_required" },
@@ -33,8 +34,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  if (!skipFreeLimits) {
-    const limits = await checkFreeCreateLimits(userId, "free");
+  if (!skipLimits && planTier) {
+    const limits = await checkCreateLimits(userId, planTier);
     if (!limits.ok) {
       return NextResponse.json({ error: limits.error }, { status: 403 });
     }
