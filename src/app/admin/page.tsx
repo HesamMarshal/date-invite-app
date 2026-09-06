@@ -30,6 +30,12 @@ export default async function AdminPage() {
         <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
         <div className="flex items-center gap-2">
           <Link
+            href="/admin/plan-types"
+            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
+          >
+            پلن‌ها
+          </Link>
+          <Link
             href="/admin/options"
             className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
           >

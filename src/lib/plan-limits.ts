@@ -1,5 +1,5 @@
 import { getPool } from "./db";
-import { RowDataPacket } from "mysql2/promise";
+import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
 export type PlanLimits = {
   slug: string;
@@ -10,6 +10,26 @@ export type PlanLimits = {
 export type PlanLimitBlock =
   | { ok: true }
   | { ok: false; error: "limit_active" | "limit_monthly" };
+
+const SLUG_RE = /^[a-z][a-z0-9_]{0,31}$/;
+
+export function isValidPlanSlug(slug: string): boolean {
+  return SLUG_RE.test(slug);
+}
+
+export async function listPlanTypes(): Promise<PlanLimits[]> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT slug, max_active, max_monthly_creates
+       FROM plan_types
+      ORDER BY slug ASC`
+  );
+  return rows.map((row) => ({
+    slug: String(row.slug),
+    max_active: Number(row.max_active),
+    max_monthly_creates: Number(row.max_monthly_creates),
+  }));
+}
 
 export async function getPlanLimits(
   slug: string
@@ -29,6 +49,34 @@ export async function getPlanLimits(
     max_active: Number(row.max_active),
     max_monthly_creates: Number(row.max_monthly_creates),
   };
+}
+
+export async function createPlanType(
+  slug: string,
+  maxActive: number,
+  maxMonthlyCreates: number
+): Promise<void> {
+  const pool = getPool();
+  await pool.query<ResultSetHeader>(
+    `INSERT INTO plan_types (slug, max_active, max_monthly_creates)
+     VALUES (?, ?, ?)`,
+    [slug, maxActive, maxMonthlyCreates]
+  );
+}
+
+export async function updatePlanTypeCaps(
+  slug: string,
+  maxActive: number,
+  maxMonthlyCreates: number
+): Promise<boolean> {
+  const pool = getPool();
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE plan_types
+        SET max_active = ?, max_monthly_creates = ?
+      WHERE slug = ?`,
+    [maxActive, maxMonthlyCreates, slug]
+  );
+  return result.affectedRows > 0;
 }
 
 export async function countActiveInvitesForUser(
