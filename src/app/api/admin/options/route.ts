@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isAdmin } from "@/lib/auth-guards";
 import {
   createInviteOption,
   listInviteOptions,
 } from "@/lib/option-queries";
 
 export async function GET() {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const options = await listInviteOptions(false);
@@ -14,7 +14,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

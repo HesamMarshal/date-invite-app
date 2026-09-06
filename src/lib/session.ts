@@ -118,9 +118,5 @@ export async function clearSession(response?: NextResponse): Promise<void> {
   }
 }
 
-export async function requireUser(): Promise<SessionUser | null> {
-  return getSessionUser();
-}
-
 export const SESSION_COOKIE_NAME = COOKIE_NAME;
 export const SESSION_MAX_AGE_SECONDS = SESSION_MAX_AGE;

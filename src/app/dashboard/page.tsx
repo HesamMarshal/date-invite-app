@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSessionUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth-guards";
 import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
-  const user = await getSessionUser();
+  const user = await requireUser();
   if (!user) redirect("/login");
 
   const name =
@@ -49,14 +49,21 @@ export default async function DashboardPage() {
             {user.telegram_username}
           </p>
         )}
+        {!user.telegram_id && (
+          <p className="text-amber-700">
+            هویت تلگرام ناقصه — دوباره از ورود با تلگرام وارد شو.
+          </p>
+        )}
       </div>
 
-      <Link
-        href="/admin"
-        className="text-center text-sm font-bold text-pink-500 hover:text-pink-600"
-      >
-        پنل ادمین (موقت) →
-      </Link>
+      {user.is_admin && (
+        <Link
+          href="/admin"
+          className="text-center text-sm font-bold text-pink-500 hover:text-pink-600"
+        >
+          پنل ادمین →
+        </Link>
+      )}
     </main>
   );
 }

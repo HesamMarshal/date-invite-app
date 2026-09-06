@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isAdmin } from "@/lib/auth-guards";
 import { createInvitation, deleteInvitation } from "@/lib/invite-queries";
 import { normalizeInviteText } from "@/lib/invite-defaults";
 import {
@@ -33,7 +33,7 @@ function parseOptionalTime(value: unknown): string | null | "invalid" {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await isAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

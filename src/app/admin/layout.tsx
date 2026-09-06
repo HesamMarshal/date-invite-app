@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { requireAdmin } from "@/lib/auth-guards";
 import AdminLogin from "./admin-login";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+export const dynamic = "force-dynamic";
+
+/**
+ * /admin gate (9-7):
+ * - ADMIN_PASSWORD cookie (interim), or
+ * - Telegram user session with is_admin = 1
+ */
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const authed = await isAdminAuthenticated();
+  const access = await requireAdmin();
 
-  if (!authed) {
+  if (!access) {
     return <AdminLogin />;
   }
 
