@@ -3,6 +3,7 @@ import { clearSession } from "@/lib/session";
 
 /** POST /api/auth/logout — delete session row + clear cookie. */
 export async function POST() {
-  await clearSession();
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  await clearSession(response);
+  return response;
 }

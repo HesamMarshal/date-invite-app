@@ -45,7 +45,18 @@ export default function TelegramLoginWidget({ botUsername }: Props) {
           body: JSON.stringify(user),
         });
         if (!res.ok) {
-          setError("ورود انجام نشد. دوباره امتحان کن.");
+          const data = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          if (data.error === "rate_limited") {
+            setError("زیاد تلاش کردی، یکم صبر کن.");
+          } else if (data.error === "config") {
+            setError("ورود با تلگرام روی سرور تنظیم نشده.");
+          } else if (data.error === "server_error") {
+            setError("خطای سرور. کمی بعد دوباره امتحان کن.");
+          } else {
+            setError("ورود انجام نشد. دوباره امتحان کن.");
+          }
           setLoading(false);
           return;
         }

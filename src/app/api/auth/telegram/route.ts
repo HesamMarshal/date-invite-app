@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSession } from "@/lib/session";
+import { attachSessionCookie, createSession } from "@/lib/session";
 import { verifyTelegramLogin } from "@/lib/telegram-auth";
 import { upsertUserFromTelegram } from "@/lib/user-queries";
 
@@ -30,7 +30,7 @@ function recordAttempt(ip: string) {
 /**
  * POST /api/auth/telegram
  * Body = Telegram Login Widget user object.
- * Generic 401 on any verify failure (no hash/expiry details).
+ * Verify failures → generic 401 (no hash/expiry details).
  */
 export async function POST(request: NextRequest) {
   const ip =
@@ -38,6 +38,10 @@ export async function POST(request: NextRequest) {
 
   if (isBlocked(ip)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  if (!process.env.TELEGRAM_BOT_TOKEN?.trim()) {
+    return NextResponse.json({ error: "config" }, { status: 503 });
   }
 
   let body: Record<string, unknown>;
@@ -56,10 +60,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await upsertUserFromTelegram(verified);
-    await createSession(user.id);
+    const sessionId = await createSession(user.id);
     LOGIN_ATTEMPTS.delete(ip);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       user: {
         id: user.id,
@@ -67,8 +71,11 @@ export async function POST(request: NextRequest) {
         telegramUsername: user.telegram_username,
       },
     });
+    attachSessionCookie(response, sessionId);
+    return response;
   } catch {
+    // DB / unexpected — do not leak details
     recordAttempt(ip);
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }

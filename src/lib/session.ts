@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 import { getPool } from "./db";
 
@@ -26,10 +27,26 @@ function cookieSecure(): boolean {
   return process.env.NODE_ENV === "production";
 }
 
-/** Insert session row + set HttpOnly cookie (30 days). */
+function sessionCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: cookieSecure(),
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  };
+}
+
+/** Insert session row; returns id. Attach cookie with `attachSessionCookie`. */
 export async function createSession(userId: number): Promise<string> {
   const id = newSessionId();
   const pool = getPool();
+
+  // Drop expired sessions for this user (keeps table small)
+  await pool.query(
+    "DELETE FROM sessions WHERE user_id = ? AND expires_at <= NOW()",
+    [userId]
+  );
 
   await pool.query<ResultSetHeader>(
     `INSERT INTO sessions (id, user_id, expires_at)
@@ -37,16 +54,15 @@ export async function createSession(userId: number): Promise<string> {
     [id, userId, SESSION_DAYS]
   );
 
-  const jar = await cookies();
-  jar.set(COOKIE_NAME, id, {
-    httpOnly: true,
-    secure: cookieSecure(),
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_MAX_AGE,
-  });
-
   return id;
+}
+
+/** Set session cookie on the HTTP response (reliable in Route Handlers / Passenger). */
+export function attachSessionCookie(
+  response: NextResponse,
+  sessionId: string
+): void {
+  response.cookies.set(COOKIE_NAME, sessionId, sessionCookieOptions());
 }
 
 /** Load user for a valid (non-expired) session cookie. */
@@ -82,8 +98,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   };
 }
 
-/** Delete session row (if any) and clear cookie. */
-export async function clearSession(): Promise<void> {
+/** Delete session row (if any) and clear cookie on the response. */
+export async function clearSession(response?: NextResponse): Promise<void> {
   const jar = await cookies();
   const sessionId = jar.get(COOKIE_NAME)?.value;
 
@@ -92,10 +108,16 @@ export async function clearSession(): Promise<void> {
     await pool.query("DELETE FROM sessions WHERE id = ?", [sessionId]);
   }
 
-  jar.delete(COOKIE_NAME);
+  if (response) {
+    response.cookies.set(COOKIE_NAME, "", {
+      ...sessionCookieOptions(),
+      maxAge: 0,
+    });
+  } else {
+    jar.delete(COOKIE_NAME);
+  }
 }
 
-/** True if a valid user session cookie is present. */
 export async function requireUser(): Promise<SessionUser | null> {
   return getSessionUser();
 }

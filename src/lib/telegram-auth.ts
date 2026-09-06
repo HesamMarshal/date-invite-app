@@ -40,7 +40,9 @@ export function verifyTelegramLogin(
   if (!Number.isFinite(authDate) || authDate <= 0) return null;
 
   const nowSec = Math.floor(Date.now() / 1000);
-  if (Math.abs(nowSec - authDate) > AUTH_MAX_AGE_SEC) return null;
+  // Allow small clock skew forward; reject only if auth_date is too old
+  if (authDate > nowSec + 60) return null;
+  if (nowSec - authDate > AUTH_MAX_AGE_SEC) return null;
 
   const checkEntries: string[] = [];
   for (const [key, value] of Object.entries(data)) {
