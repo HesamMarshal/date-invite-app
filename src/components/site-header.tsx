@@ -16,7 +16,6 @@ function navItems(
   if (area === "admin") {
     return [
       { href: "/dashboard", label: "داشبورد" },
-      { href: "/admin", label: "دعوت‌نامه‌ها" },
       { href: "/admin/users", label: "کاربران" },
       { href: "/admin/messages", label: "پیام‌ها" },
       { href: "/admin/plan-types", label: "پلن‌ها" },

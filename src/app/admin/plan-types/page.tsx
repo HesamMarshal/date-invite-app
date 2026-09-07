@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listPlanTypes } from "@/lib/plan-limits";
 import PlanTypesManager from "./plan-types-manager";
 
@@ -17,7 +18,15 @@ export default async function AdminPlanTypesPage() {
       className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6"
       dir="rtl"
     >
-      <h1 className="text-2xl font-bold">پلن‌ها و سقف‌ها</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">پلن‌ها و سقف‌ها</h1>
+        <Link
+          href="/admin"
+          className="rounded-full bg-zinc-200 px-4 py-2 text-sm font-bold hover:bg-zinc-300"
+        >
+          ← بازگشت
+        </Link>
+      </div>
 
       <p className="text-sm text-zinc-500">
         سقف دعوت فعال و ساخت ماهانه از جدول{" "}
