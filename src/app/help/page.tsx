@@ -147,6 +147,12 @@ export default function HelpPage() {
               </Link>{" "}
               بزن.
             </li>
+            <li>
+              نوع لینک رو انتخاب کن:{" "}
+              <strong className="font-bold text-zinc-800">لینک با مزه</strong>{" "}
+              یا{" "}
+              <strong className="font-bold text-zinc-800">دعوت واقعی</strong>.
+            </li>
             <li>اسم مهمون رو بنویس.</li>
             <li>اختیاری: متن دعوت، غذا، بازه تاریخ/ساعت، انقضا.</li>
             <li>بساز رو بزن.</li>
@@ -168,6 +174,10 @@ export default function HelpPage() {
             <li>اگر بله: تاریخ → ساعت → غذا.</li>
             <li>صفحهٔ تشکر؛ می‌تونه بعداً جواب رو عوض کنه.</li>
           </ol>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            تو «لینک با مزه» دکمهٔ نه شوخی می‌کنه و کوچیک می‌شه. تو «دعوت واقعی»
+            بله و نه هر دو جدی‌ان؛ نه یک تأیید می‌خواد و ثبت می‌شه.
+          </p>
           <p className="text-xs text-zinc-400">
             عکس‌های این بخش به‌زودی اضافه می‌شه.
           </p>

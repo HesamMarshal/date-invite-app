@@ -283,7 +283,7 @@ export default function InviteFlow({
                   onClick={() => setStep("date")}
                   className="flex-1 rounded-full bg-pink-500 px-8 py-4 text-lg font-bold text-white shadow-lg shadow-pink-500/20 transition-all duration-300 hover:bg-pink-600 active:scale-[0.97]"
                 >
-                  💚 بله
+                  بله
                 </button>
                 <button
                   onClick={() => setStep("confirm")}
@@ -292,10 +292,7 @@ export default function InviteFlow({
                   نه
                 </button>
               </div>
-              <p className="mt-4 min-h-6 text-sm text-zinc-400">
-                فقط یکی رو انتخاب کن
-              </p>
-              {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+              {error && <p className="mt-4 text-sm text-red-500">{error}</p>}
             </div>
           ) : (
             <div className="w-full max-w-sm">
@@ -495,13 +492,25 @@ export default function InviteFlow({
       {/* ───── Goodbye ───── */}
       {step === "goodbye" && (
         <div className="flex flex-col items-center gap-6 animate-fade-in">
-          <span className="text-7xl animate-float">😔</span>
-          <h1 className="text-2xl font-bold">باشه...</h1>
-          <p className="text-lg text-zinc-600 leading-relaxed">
-            ولی اگه نظرت عوض شد
-            <br />
-            همین لینک همیشه فعاله ❤️
-          </p>
+          {kind === "real" ? (
+            <>
+              <span className="text-7xl animate-float">🤍</span>
+              <h1 className="text-2xl font-bold">باشه</h1>
+              <p className="text-lg leading-relaxed text-zinc-600">
+                اگه نظرت عوض شد، همین لینک بازه.
+              </p>
+            </>
+          ) : (
+            <>
+              <span className="text-7xl animate-float">😔</span>
+              <h1 className="text-2xl font-bold">باشه...</h1>
+              <p className="text-lg leading-relaxed text-zinc-600">
+                ولی اگه نظرت عوض شد
+                <br />
+                همین لینک همیشه فعاله ❤️
+              </p>
+            </>
+          )}
         </div>
       )}
     </main>
