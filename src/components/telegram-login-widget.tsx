@@ -86,7 +86,21 @@ export default function TelegramLoginWidget({ botUsername }: Props) {
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
     host.appendChild(script);
 
+    const styleIframes = () => {
+      host.querySelectorAll("iframe").forEach((el) => {
+        const iframe = el as HTMLIFrameElement;
+        // Match Telegram button blue so radius corners aren't black
+        iframe.style.backgroundColor = "#54a9eb";
+        iframe.style.colorScheme = "light";
+        iframe.style.border = "0";
+      });
+    };
+    const observer = new MutationObserver(styleIframes);
+    observer.observe(host, { childList: true, subtree: true });
+    styleIframes();
+
     return () => {
+      observer.disconnect();
       delete window.onTelegramAuth;
       host.innerHTML = "";
     };
@@ -104,7 +118,7 @@ export default function TelegramLoginWidget({ botUsername }: Props) {
     <div className="flex w-full flex-col items-center gap-4">
       <div
         ref={hostRef}
-        className="flex min-h-[44px] w-full items-center justify-center"
+        className="telegram-login-host mx-auto flex w-fit min-h-[44px] items-center justify-center overflow-hidden rounded-xl bg-[#54a9eb]"
       />
       {loading && <p className="text-sm text-zinc-500">در حال ورود...</p>}
       {error && <p className="text-center text-sm text-red-500">{error}</p>}

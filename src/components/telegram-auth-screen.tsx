@@ -18,7 +18,7 @@ export default function TelegramAuthScreen({
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center gap-6 p-8"
+      className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#fafafa] p-8 [color-scheme:light]"
       dir="rtl"
     >
       <Link
