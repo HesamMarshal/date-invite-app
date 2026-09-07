@@ -23,7 +23,7 @@ export default async function AdminUsersPage() {
 
   return (
     <main
-      className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6"
+      className="mx-auto flex min-h-screen w-full min-w-0 max-w-2xl flex-col gap-6 overflow-x-clip p-6"
       dir="rtl"
     >
       <div className="flex items-center justify-between gap-3">
@@ -41,11 +41,11 @@ export default async function AdminUsersPage() {
       ) : users.length === 0 ? (
         <p className="text-center text-zinc-400">هنوز کاربری نیست</p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           {users.map((u) => (
             <div
               key={u.id}
-              className="space-y-2 rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm"
+              className="w-full space-y-2 rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>

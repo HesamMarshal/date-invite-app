@@ -15,7 +15,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <main
-      className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6"
+      className="mx-auto flex min-h-screen w-full min-w-0 max-w-2xl flex-col gap-6 overflow-x-clip p-6"
       dir="rtl"
     >
       <div className="flex items-center justify-between gap-3">
@@ -35,11 +35,11 @@ export default async function AdminMessagesPage() {
       ) : messages.length === 0 ? (
         <p className="text-center text-zinc-400">پیامی نیست</p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex w-full flex-col gap-3">
           {messages.map((m) => (
             <div
               key={m.id}
-              className="space-y-2 rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm"
+              className="w-full space-y-2 rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="font-bold">{m.name}</p>
