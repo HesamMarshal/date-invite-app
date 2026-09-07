@@ -30,7 +30,7 @@ export default function InviteActiveToggle({
         router.refresh();
       } else if (data.error === "limit_active") {
         setError(
-          maxActive != null
+          maxActive != null && maxActive !== -1
             ? `حداکثر ${maxActive} دعوت فعال — یکی رو غیرفعال کن`
             : "به سقف دعوت فعال رسیدی — یکی رو غیرفعال کن"
         );

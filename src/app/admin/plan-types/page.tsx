@@ -30,7 +30,8 @@ export default async function AdminPlanTypesPage() {
 
       <p className="text-sm text-zinc-500">
         سقف دعوت فعال و ساخت ماهانه از جدول{" "}
-        <span dir="ltr">plan_types</span> خونده می‌شه.
+        <span dir="ltr">plan_types</span> خونده می‌شه. مقدار{" "}
+        <span dir="ltr">-1</span> یعنی بدون سقف.
       </p>
 
       {dbError ? (

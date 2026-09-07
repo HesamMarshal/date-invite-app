@@ -5,6 +5,7 @@ import { requireUser, requireVerified } from "@/lib/auth-guards";
 import { listInviteOptions } from "@/lib/option-queries";
 import {
   checkCreateLimits,
+  formatPlanCapFa,
   getPlanLimits,
 } from "@/lib/plan-limits";
 import CreateInvite from "@/components/create-invite";
@@ -78,8 +79,8 @@ export default async function DashboardNewInvitePage() {
 
       {planLimits && !limitError && (
         <p className="text-center text-xs text-zinc-400">
-          تا {planLimits.max_active} فعال و {planLimits.max_monthly_creates}{" "}
-          ساخت در ماه
+          تا {formatPlanCapFa(planLimits.max_active)} فعال و{" "}
+          {formatPlanCapFa(planLimits.max_monthly_creates)} ساخت در ماه
         </p>
       )}
 
@@ -91,15 +92,16 @@ export default async function DashboardNewInvitePage() {
 
       {limitError === "limit_active" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          حداکثر {planLimits?.max_active ?? "—"} دعوت‌نامه فعال داری. یکی رو
-          غیرفعال کن یا صبر کن تا منقضی بشه.
+          حداکثر {planLimits ? formatPlanCapFa(planLimits.max_active) : "—"}{" "}
+          دعوت‌نامه فعال داری. یکی رو غیرفعال کن یا صبر کن تا منقضی بشه.
         </div>
       )}
 
       {limitError === "limit_monthly" && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          این ماه {planLimits?.max_monthly_creates ?? "—"} دعوت‌نامه ساختی. ماه
-          بعد دوباره امتحان کن.
+          این ماه{" "}
+          {planLimits ? formatPlanCapFa(planLimits.max_monthly_creates) : "—"}{" "}
+          دعوت‌نامه ساختی. ماه بعد دوباره امتحان کن.
         </div>
       )}
 

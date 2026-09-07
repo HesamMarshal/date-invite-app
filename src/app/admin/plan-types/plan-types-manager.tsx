@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PlanLimits } from "@/lib/plan-limits";
+import { formatPlanCapFa, isValidPlanCap } from "@/lib/plan-cap";
 
 export default function PlanTypesManager({
   initialPlans,
@@ -27,7 +28,7 @@ export default function PlanTypesManager({
     const s = slug.trim().toLowerCase();
     const a = Number(maxActive);
     const m = Number(maxMonthly);
-    if (!s || !Number.isInteger(a) || a < 1 || !Number.isInteger(m) || m < 1) {
+    if (!s || !isValidPlanCap(a) || !isValidPlanCap(m)) {
       return;
     }
     setLoading(true);
@@ -80,8 +81,8 @@ export default function PlanTypesManager({
     if (!editingSlug) return;
     const a = Number(editActive);
     const m = Number(editMonthly);
-    if (!Number.isInteger(a) || a < 1 || !Number.isInteger(m) || m < 1) {
-      setError("اعداد باید عدد صحیح ≥ ۱ باشن");
+    if (!isValidPlanCap(a) || !isValidPlanCap(m)) {
+      setError("عدد ≥ ۱، یا ۱- برای بدون سقف");
       return;
     }
     setLoading(true);
@@ -135,7 +136,7 @@ export default function PlanTypesManager({
             <label className="mb-1 block text-xs text-zinc-400">حداکثر فعال</label>
             <input
               type="number"
-              min={1}
+              min={-1}
               value={maxActive}
               onChange={(e) => setMaxActive(e.target.value)}
               className="w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 text-sm outline-none focus:border-pink-500"
@@ -148,7 +149,7 @@ export default function PlanTypesManager({
             </label>
             <input
               type="number"
-              min={1}
+              min={-1}
               value={maxMonthly}
               onChange={(e) => setMaxMonthly(e.target.value)}
               className="w-full rounded-xl border border-zinc-300 bg-zinc-50 px-4 py-3 text-sm outline-none focus:border-pink-500"
@@ -187,7 +188,7 @@ export default function PlanTypesManager({
                     </label>
                     <input
                       type="number"
-                      min={1}
+                      min={-1}
                       value={editActive}
                       onChange={(e) => setEditActive(e.target.value)}
                       className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-pink-500"
@@ -200,7 +201,7 @@ export default function PlanTypesManager({
                     </label>
                     <input
                       type="number"
-                      min={1}
+                      min={-1}
                       value={editMonthly}
                       onChange={(e) => setEditMonthly(e.target.value)}
                       className="w-full rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-pink-500"
@@ -233,7 +234,8 @@ export default function PlanTypesManager({
                     {p.slug}
                   </p>
                   <p className="text-sm text-zinc-500">
-                    {p.max_active} فعال · {p.max_monthly_creates} ساخت / ماه
+                    {formatPlanCapFa(p.max_active)} فعال ·{" "}
+                    {formatPlanCapFa(p.max_monthly_creates)} ساخت / ماه
                   </p>
                 </div>
                 <button

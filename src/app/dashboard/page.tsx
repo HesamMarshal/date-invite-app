@@ -6,6 +6,7 @@ import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import {
   countActiveInvitesForUser,
   countMonthlyCreatesForUser,
+  formatPlanCapFa,
   getPlanLimits,
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
@@ -79,8 +80,9 @@ export default async function DashboardPage() {
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
         {planLimits && !dbError && (
           <p className="text-xs text-zinc-400">
-            {activeCount} از {planLimits.max_active} فعال · {monthlyCount} از{" "}
-            {planLimits.max_monthly_creates} ساخت این ماه
+            {activeCount} از {formatPlanCapFa(planLimits.max_active)} فعال ·{" "}
+            {monthlyCount} از {formatPlanCapFa(planLimits.max_monthly_creates)}{" "}
+            ساخت این ماه
           </p>
         )}
       </div>

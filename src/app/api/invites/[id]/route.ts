@@ -7,6 +7,7 @@ import {
 import {
   countActiveInvitesForUser,
   getPlanLimits,
+  isUnlimitedCap,
 } from "@/lib/plan-limits";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -46,7 +47,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       getPlanLimits(user.plan_tier),
       countActiveInvitesForUser(user.id),
     ]);
-    if (!limits || active >= limits.max_active) {
+    if (
+      !limits ||
+      (!isUnlimitedCap(limits.max_active) && active >= limits.max_active)
+    ) {
       return NextResponse.json({ error: "limit_active" }, { status: 403 });
     }
   }

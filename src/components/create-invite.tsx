@@ -178,11 +178,11 @@ export default function CreateInvite({
         unauthorized: "اول با تلگرام وارد شو",
         telegram_required: "برای ساخت دعوت با تلگرام وارد شو (ادمین پسورد کافی نیست)",
         limit_active:
-          maxActive != null
+          maxActive != null && maxActive !== -1
             ? `حداکثر ${maxActive} دعوت‌نامه فعال داری — یکی رو غیرفعال کن یا صبر کن تا منقضی بشه`
             : "به سقف دعوت فعال رسیدی — یکی رو غیرفعال کن یا صبر کن تا منقضی بشه",
         limit_monthly:
-          maxMonthly != null
+          maxMonthly != null && maxMonthly !== -1
             ? `این ماه ${maxMonthly} دعوت‌نامه ساختی — ماه بعد دوباره امتحان کن`
             : "این ماه به سقف ساخت دعوت رسیدی — ماه بعد دوباره امتحان کن",
       }) as Record<string, string>,

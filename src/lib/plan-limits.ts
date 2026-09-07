@@ -1,5 +1,6 @@
 import { getPool } from "./db";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
+import { isUnlimitedCap } from "./plan-cap";
 
 export type PlanLimits = {
   slug: string;
@@ -10,6 +11,14 @@ export type PlanLimits = {
 export type PlanLimitBlock =
   | { ok: true }
   | { ok: false; error: "limit_active" | "limit_monthly" };
+
+export {
+  UNLIMITED_CAP,
+  formatPlanCapFa,
+  isUnlimitedCap,
+  isValidPlanCap,
+  parsePlanCap,
+} from "./plan-cap";
 
 const SLUG_RE = /^[a-z][a-z0-9_]{0,31}$/;
 
@@ -135,10 +144,13 @@ export async function checkCreateLimits(
     countMonthlyCreatesForUser(userId),
   ]);
 
-  if (active >= limits.max_active) {
+  if (!isUnlimitedCap(limits.max_active) && active >= limits.max_active) {
     return { ok: false, error: "limit_active" };
   }
-  if (monthly >= limits.max_monthly_creates) {
+  if (
+    !isUnlimitedCap(limits.max_monthly_creates) &&
+    monthly >= limits.max_monthly_creates
+  ) {
     return { ok: false, error: "limit_monthly" };
   }
   return { ok: true };

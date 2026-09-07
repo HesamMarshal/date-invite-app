@@ -4,13 +4,8 @@ import {
   createPlanType,
   isValidPlanSlug,
   listPlanTypes,
+  parsePlanCap,
 } from "@/lib/plan-limits";
-
-function parsePositiveInt(value: unknown): number | null {
-  const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isInteger(n) || n < 1) return null;
-  return n;
-}
 
 export async function GET() {
   if (!(await isAdmin())) {
@@ -34,8 +29,8 @@ export async function POST(request: NextRequest) {
 
   const slug =
     typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
-  const maxActive = parsePositiveInt(body.max_active);
-  const maxMonthly = parsePositiveInt(body.max_monthly_creates);
+  const maxActive = parsePlanCap(body.max_active);
+  const maxMonthly = parsePlanCap(body.max_monthly_creates);
 
   if (!isValidPlanSlug(slug)) {
     return NextResponse.json({ error: "invalid_slug" }, { status: 400 });
