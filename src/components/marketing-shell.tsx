@@ -8,15 +8,19 @@ export default async function MarketingShell({
   children: React.ReactNode;
 }) {
   let loggedIn = false;
+  let isAdmin = false;
   try {
-    loggedIn = Boolean(await getSessionUser());
+    const user = await getSessionUser();
+    loggedIn = Boolean(user);
+    isAdmin = Boolean(user?.is_admin);
   } catch {
     loggedIn = false;
+    isAdmin = false;
   }
 
   return (
     <div className="flex min-h-screen min-w-0 max-w-full flex-col overflow-x-clip">
-      <SiteHeader loggedIn={loggedIn} />
+      <SiteHeader area="public" loggedIn={loggedIn} isAdmin={isAdmin} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>

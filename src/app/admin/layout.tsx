@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import SiteHeader from "@/components/site-header";
 import { requireAdmin } from "@/lib/auth-guards";
 
 export const metadata: Metadata = {
@@ -45,5 +46,10 @@ export default async function AdminLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip">
+      <SiteHeader area="admin" loggedIn isAdmin />
+      {children}
+    </div>
+  );
 }

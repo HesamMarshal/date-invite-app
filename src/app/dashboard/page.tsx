@@ -10,7 +10,6 @@ import {
   getPlanLimits,
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
-import LogoutButton from "./logout-button";
 import InviteActiveToggle from "./invite-active-toggle";
 
 export const dynamic = "force-dynamic";
@@ -68,21 +67,6 @@ export default async function DashboardPage() {
       className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-8 overflow-x-clip p-6"
       dir="rtl"
     >
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-        <Link href="/" className="text-lg font-bold text-zinc-900">
-          💌 بیا با من
-        </Link>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/help"
-            className="rounded-full bg-zinc-100 px-3 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200"
-          >
-            راهنما
-          </Link>
-          <LogoutButton />
-        </div>
-      </div>
-
       <div className="space-y-2">
         <h1 className="break-words text-2xl font-bold">سلام {name} 👋</h1>
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
@@ -213,14 +197,6 @@ export default async function DashboardPage() {
         })}
       </div>
 
-      {user.is_admin && (
-        <Link
-          href="/admin"
-          className="text-center text-sm font-bold text-pink-500 hover:text-pink-600"
-        >
-          پنل ادمین →
-        </Link>
-      )}
     </main>
   );
 }

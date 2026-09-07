@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
 import CopyButton from "@/components/copy-button";
-import LogoutButton from "./logout-button";
 
 export const dynamic = "force-dynamic";
 
@@ -26,36 +24,7 @@ export default async function AdminPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full min-w-0 max-w-2xl flex-col gap-8 overflow-x-clip p-6" dir="rtl">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/admin/users"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
-          >
-            کاربران
-          </Link>
-          <Link
-            href="/admin/messages"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
-          >
-            پیام‌ها
-          </Link>
-          <Link
-            href="/admin/plan-types"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
-          >
-            پلن‌ها
-          </Link>
-          <Link
-            href="/admin/options"
-            className="rounded-full bg-zinc-100 px-4 py-2 text-sm font-bold hover:bg-zinc-200"
-          >
-            گزینه‌ها
-          </Link>
-          <LogoutButton />
-        </div>
-      </div>
+      <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
 
       {dbError && (
         <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-600 text-center">
