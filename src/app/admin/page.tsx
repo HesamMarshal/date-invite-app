@@ -67,6 +67,8 @@ export default async function AdminPage() {
             unseen: "🔗 باز نکرده",
           }[status];
 
+          const kindLabel = inv.kind === "real" ? "واقعی" : "با مزه";
+
           const url = `${appUrl}/i/${inv.token}`;
 
           return (
@@ -75,9 +77,14 @@ export default async function AdminPage() {
               className="min-w-0 max-w-full space-y-3 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
             >
               <div className="flex min-w-0 items-center justify-between gap-2">
-                <span className="min-w-0 truncate text-lg font-bold">
-                  {inv.recipient_name}
-                </span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="min-w-0 truncate text-lg font-bold">
+                    {inv.recipient_name}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+                    {kindLabel}
+                  </span>
+                </div>
                 <span className="shrink-0 text-sm">{statusLabel}</span>
               </div>
 
