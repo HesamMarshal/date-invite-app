@@ -7,6 +7,10 @@ export function toAsciiDigits(value: string): string {
     .replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
 }
 
+export function toPersianDigits(value: string | number): string {
+  return String(value).replace(/\d/g, (d) => PERSIAN_DIGITS[Number(d)]);
+}
+
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }

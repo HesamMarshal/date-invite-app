@@ -11,6 +11,7 @@ import {
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
 import InviteActiveToggle from "./invite-active-toggle";
+import { toPersianDigits } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -72,9 +73,10 @@ export default async function DashboardPage() {
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
         {planLimits && !dbError && (
           <p className="text-xs text-zinc-400">
-            {activeCount} از {formatPlanCapFa(planLimits.max_active)} فعال ·{" "}
-            {monthlyCount} از {formatPlanCapFa(planLimits.max_monthly_creates)}{" "}
-            ساخت این ماه
+            {toPersianDigits(activeCount)} از{" "}
+            {formatPlanCapFa(planLimits.max_active)} فعال ·{" "}
+            {toPersianDigits(monthlyCount)} از{" "}
+            {formatPlanCapFa(planLimits.max_monthly_creates)} ساخت این ماه
           </p>
         )}
       </div>
@@ -141,7 +143,7 @@ export default async function DashboardPage() {
 
               {inv.open_count > 0 && (
                 <p className="text-xs text-zinc-400">
-                  {inv.open_count} بار باز شده
+                  {toPersianDigits(inv.open_count)} بار باز شده
                 </p>
               )}
 

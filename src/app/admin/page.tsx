@@ -2,6 +2,7 @@ import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
 import CopyButton from "@/components/copy-button";
+import { toPersianDigits } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export default async function AdminPage() {
 
               {inv.open_count > 0 && (
                 <p className="text-xs text-zinc-400">
-                  {inv.open_count} بار باز شده
+                  {toPersianDigits(inv.open_count)} بار باز شده
                 </p>
               )}
 
