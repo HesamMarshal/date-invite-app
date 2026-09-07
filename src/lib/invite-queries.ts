@@ -2,12 +2,15 @@ import crypto from "crypto";
 import { getPool } from "./db";
 import { RowDataPacket, ResultSetHeader } from "mysql2/promise";
 
+export type InviteKind = "funny" | "real";
+
 export interface Invitation {
   id: number;
   user_id?: number | null;
   token: string;
   recipient_name: string;
   invite_text: string;
+  kind: InviteKind;
   opened_at: string | null;
   open_count: number;
   expires_at: string | null;
@@ -49,6 +52,7 @@ function mapInvitationRow(row: RowDataPacket): Invitation {
     ...(row as Invitation),
     id: Number(row.id),
     user_id: row.user_id != null ? Number(row.user_id) : null,
+    kind: row.kind === "real" ? "real" : "funny",
     is_active: !!row.is_active,
     deleted_at: row.deleted_at ?? null,
   };
@@ -192,7 +196,8 @@ export async function createInvitation(
   expiresAt: string | null,
   optionIds: number[],
   windows: InviteWindowFields,
-  userId: number | null = null
+  userId: number | null = null,
+  kind: InviteKind = "funny"
 ): Promise<string> {
   const pool = getPool();
   const token = generateToken();
@@ -201,13 +206,14 @@ export async function createInvitation(
     await conn.beginTransaction();
     const [result] = await conn.query<ResultSetHeader>(
       `INSERT INTO invitations
-         (token, recipient_name, invite_text, expires_at,
+         (token, recipient_name, invite_text, kind, expires_at,
           date_from, date_to, time_from, time_to, user_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         token,
         recipientName,
         inviteText,
+        kind,
         expiresAt || null,
         windows.dateFrom,
         windows.dateTo,

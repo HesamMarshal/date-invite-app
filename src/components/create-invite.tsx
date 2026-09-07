@@ -183,6 +183,7 @@ export default function CreateInvite({
         invalid_date_window: "بازه تاریخ درست نیست",
         invalid_time_window: "بازه ساعت درست نیست (از ≤ تا)",
         invalid_window: "بازه تاریخ/ساعت درست نیست",
+        invalid_kind: "نوع دعوت معتبر نیست",
         unauthorized: "اول با تلگرام وارد شو",
         telegram_required: "برای ساخت دعوت با تلگرام وارد شو (ادمین پسورد کافی نیست)",
         limit_active:
@@ -231,7 +232,7 @@ export default function CreateInvite({
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !optionsValid) return;
+    if (!name.trim() || !optionsValid || !kind) return;
     setLoading(true);
     setError("");
 
@@ -279,6 +280,7 @@ export default function CreateInvite({
         body: JSON.stringify({
           recipientName: name.trim(),
           inviteText: inviteText.trim() || DEFAULT_INVITE_TEXT,
+          kind,
           expiresAt,
           optionIds: selectedIds,
           dateFrom: dateFrom || null,
