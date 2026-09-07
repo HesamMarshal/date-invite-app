@@ -36,6 +36,9 @@ export default function SiteFooter() {
             </p>
           </div>
           <nav className="flex flex-col gap-2 text-sm font-bold text-zinc-700 sm:items-end">
+            <Link href="/help" className="hover:text-pink-500">
+              راهنما
+            </Link>
             <Link href="/contact" className="hover:text-pink-500">
               ارتباط با ما
             </Link>

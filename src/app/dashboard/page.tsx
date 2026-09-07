@@ -72,7 +72,15 @@ export default async function DashboardPage() {
         <Link href="/" className="text-lg font-bold text-zinc-900">
           💌 بیا با من
         </Link>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <Link
+            href="/help"
+            className="rounded-full bg-zinc-100 px-3 py-2 text-sm font-bold text-zinc-600 hover:bg-zinc-200"
+          >
+            راهنما
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -101,7 +109,18 @@ export default async function DashboardPage() {
       )}
 
       {!dbError && invites.length === 0 && (
-        <p className="py-4 text-center text-zinc-400">هنوز دعوت‌نامه‌ای نداری</p>
+        <div className="space-y-2 py-4 text-center">
+          <p className="text-zinc-400">هنوز دعوت‌نامه‌ای نداری</p>
+          <p className="text-sm text-zinc-500">
+            نمی‌دونی از کجا شروع کنی؟{" "}
+            <Link
+              href="/help"
+              className="font-bold text-pink-600 hover:underline"
+            >
+              راهنما رو بخون
+            </Link>
+          </p>
+        </div>
       )}
 
       <div className="flex flex-col gap-4">

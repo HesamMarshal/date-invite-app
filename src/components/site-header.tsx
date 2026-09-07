@@ -9,6 +9,12 @@ export default function SiteHeader() {
         </Link>
         <nav className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
           <Link
+            href="/help"
+            className="rounded-full px-3 py-2 text-sm font-bold text-zinc-600 transition hover:bg-zinc-100 sm:px-4"
+          >
+            راهنما
+          </Link>
+          <Link
             href="/contact"
             className="rounded-full px-3 py-2 text-sm font-bold text-zinc-600 transition hover:bg-zinc-100 sm:px-4"
           >
