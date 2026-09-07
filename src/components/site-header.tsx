@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const NAV = [
+const NAV: { href: string; label: string; primary?: boolean }[] = [
   { href: "/help", label: "راهنما" },
   { href: "/contact", label: "ارتباط با ما" },
   { href: "/login", label: "ورود" },
   { href: "/signup", label: "ثبت‌نام", primary: true },
-] as const;
+];
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
