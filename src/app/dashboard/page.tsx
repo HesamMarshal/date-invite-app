@@ -65,10 +65,10 @@ export default async function DashboardPage() {
 
   return (
     <main
-      className="mx-auto flex min-h-screen max-w-lg flex-col gap-8 p-6"
+      className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-8 overflow-x-clip p-6"
       dir="rtl"
     >
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
         <Link href="/" className="text-lg font-bold text-zinc-900">
           💌 بیا با من
         </Link>
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-bold">سلام {name} 👋</h1>
+        <h1 className="break-words text-2xl font-bold">سلام {name} 👋</h1>
         <p className="text-sm text-zinc-500">دعوت‌نامه‌های تو</p>
         {planLimits && !dbError && (
           <p className="text-xs text-zinc-400">
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         {invites.map((inv) => {
           const status = inviteStatus(inv);
           const url = `${appUrl}/i/${inv.token}`;
@@ -132,15 +132,17 @@ export default async function DashboardPage() {
           return (
             <div
               key={inv.id}
-              className={`space-y-3 rounded-2xl border p-5 shadow-sm ${
+              className={`min-w-0 max-w-full space-y-3 rounded-2xl border p-5 shadow-sm ${
                 isActive
                   ? "border-zinc-100 bg-white"
                   : "border-zinc-200 bg-zinc-50 opacity-90"
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-lg font-bold">{inv.recipient_name}</span>
-                <span className="text-sm">{STATUS_LABEL[status]}</span>
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 truncate text-lg font-bold">
+                  {inv.recipient_name}
+                </span>
+                <span className="shrink-0 text-sm">{STATUS_LABEL[status]}</span>
               </div>
 
               {!isActive && (
@@ -149,7 +151,7 @@ export default async function DashboardPage() {
                 </p>
               )}
 
-              <p className="text-sm text-zinc-500">
+              <p className="break-words text-sm text-zinc-500">
                 {inv.recipient_name}، {inv.invite_text}
               </p>
 
@@ -188,11 +190,12 @@ export default async function DashboardPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 pt-1">
+              <div className="flex min-w-0 flex-col gap-2 pt-1 sm:flex-row sm:items-center">
                 <input
                   readOnly
                   value={url}
-                  className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
+                  dir="ltr"
+                  className="w-full min-w-0 flex-1 truncate rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                 />
                 <CopyButton
                   text={url}

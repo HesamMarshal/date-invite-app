@@ -25,7 +25,7 @@ export default async function DashboardNewInvitePage() {
   if (!verified) {
     return (
       <main
-        className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-6"
+        className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-6 overflow-x-clip p-6"
         dir="rtl"
       >
         <Link href="/dashboard" className="text-sm text-zinc-500 hover:text-zinc-800">
@@ -64,7 +64,7 @@ export default async function DashboardNewInvitePage() {
 
   return (
     <main
-      className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-6"
+      className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-6 overflow-x-clip p-6"
       dir="rtl"
     >
       <div className="flex items-center justify-between gap-3">

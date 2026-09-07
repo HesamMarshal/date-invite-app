@@ -25,7 +25,7 @@ export default async function AdminPage() {
     process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
 
   return (
-    <main className="flex flex-col gap-8 p-6 max-w-2xl mx-auto min-h-screen" dir="rtl">
+    <main className="mx-auto flex min-h-screen w-full min-w-0 max-w-2xl flex-col gap-8 overflow-x-clip p-6" dir="rtl">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">📋 دعوت‌نامه‌ها</h1>
         <div className="flex flex-wrap items-center gap-2">
@@ -102,11 +102,13 @@ export default async function AdminPage() {
           return (
             <div
               key={inv.id}
-              className="rounded-2xl bg-white p-5 shadow-sm border border-zinc-100 space-y-3"
+              className="min-w-0 max-w-full space-y-3 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-lg">{inv.recipient_name}</span>
-                <span className="text-sm">{statusLabel}</span>
+              <div className="flex min-w-0 items-center justify-between gap-2">
+                <span className="min-w-0 truncate text-lg font-bold">
+                  {inv.recipient_name}
+                </span>
+                <span className="shrink-0 text-sm">{statusLabel}</span>
               </div>
 
               <p className="text-sm text-zinc-500">
@@ -148,11 +150,12 @@ export default async function AdminPage() {
                 </div>
               )}
 
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex min-w-0 flex-col gap-2 pt-2 sm:flex-row sm:items-center">
                 <input
                   readOnly
                   value={url}
-                  className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
+                  dir="ltr"
+                  className="w-full min-w-0 flex-1 truncate rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500 outline-none"
                 />
                 <CopyButton
                   text={url}

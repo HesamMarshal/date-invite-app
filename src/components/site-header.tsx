@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-10 border-b border-zinc-100/80 bg-[#fafafa]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-4">
+      <div className="mx-auto flex w-full min-w-0 max-w-3xl flex-wrap items-center justify-between gap-3 px-6 py-4">
         <Link href="/" className="text-xl font-bold text-zinc-900">
           💌 بیا با من
         </Link>

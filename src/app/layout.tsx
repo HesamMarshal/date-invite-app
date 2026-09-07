@@ -33,14 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className="h-full">
+    <html lang="fa" dir="rtl" className="h-full overflow-x-clip">
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full max-w-full flex-col overflow-x-clip">
+        {children}
+      </body>
     </html>
   );
 }

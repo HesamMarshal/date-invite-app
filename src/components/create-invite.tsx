@@ -559,11 +559,12 @@ export default function CreateInvite({
       {result && (
         <div className="space-y-3 rounded-xl bg-pink-50 p-4">
           <p className="text-sm font-bold text-pink-700">✓ ساخته شد! لینک رو بفرست</p>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
             <input
               readOnly
               value={result.url}
-              className="flex-1 rounded-xl border border-pink-200 bg-white px-3 py-2 text-sm outline-none"
+              dir="ltr"
+              className="w-full min-w-0 flex-1 truncate rounded-xl border border-pink-200 bg-white px-3 py-2 text-sm outline-none"
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
             <CopyButton text={result.url} shareTitle="دعوت‌نامه بیا با من" />

@@ -64,7 +64,7 @@ export default function CopyButton({
   };
 
   return (
-    <div className="flex shrink-0 items-center gap-1.5">
+    <div className="flex max-w-full min-w-0 flex-wrap items-center gap-1.5">
       <button
         type="button"
         onClick={handleCopy}
