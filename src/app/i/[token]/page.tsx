@@ -68,6 +68,7 @@ export default async function InvitePage({ params }: Props) {
           token={token}
           name={invite.recipient_name}
           inviteText={invite.invite_text}
+          kind={invite.kind}
           foodOptions={foodOptions}
           windows={{
             dateFrom: toDateOnly(invite.date_from),
