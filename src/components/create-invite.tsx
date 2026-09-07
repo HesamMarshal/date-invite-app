@@ -13,6 +13,13 @@ import {
 
 type OptionItem = { id: number; emoji: string; label: string };
 
+type InviteKind = "funny" | "real";
+
+const INVITE_KINDS: { id: InviteKind; title: string; desc: string }[] = [
+  { id: "funny", title: "لینک با مزه", desc: "دکمه نه کوچیک می‌شه" },
+  { id: "real", title: "دعوت واقعی", desc: "بله و نه هر دو جدی‌ان" },
+];
+
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
@@ -130,6 +137,7 @@ export default function CreateInvite({
   maxMonthly?: number;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [kind, setKind] = useState<InviteKind | null>(null);
   const [name, setName] = useState("");
   const [inviteText, setInviteText] = useState("");
 
@@ -311,12 +319,63 @@ export default function CreateInvite({
     );
   }
 
+  if (!kind && !result) {
+    return (
+      <div className="space-y-4 rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm">
+        <p className="font-bold">چه نوع لینکی؟</p>
+        <div className="grid gap-3">
+          {INVITE_KINDS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setKind(item.id)}
+              className="rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
+            >
+              <span className="block font-bold">{item.title}</span>
+              <span className="mt-1 block text-sm text-zinc-500">
+                {item.desc}
+              </span>
+            </button>
+          ))}
+        </div>
+        {!defaultOpen && (
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              setKind(null);
+            }}
+            className="w-full rounded-full bg-zinc-200 px-6 py-3 font-bold transition hover:bg-zinc-300"
+          >
+            بستن
+          </button>
+        )}
+      </div>
+    );
+  }
+
   const datePickerClass =
     "w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center outline-none focus:border-pink-500";
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm border border-zinc-100 space-y-4">
-      <p className="font-bold">دعوت‌نامه جدید</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-bold">دعوت‌نامه جدید</p>
+        {kind && !result && (
+          <button
+            type="button"
+            onClick={() => setKind(null)}
+            className="text-xs text-pink-600 hover:underline"
+          >
+            تغییر نوع
+          </button>
+        )}
+      </div>
+      {kind && !result && (
+        <p className="text-xs text-zinc-400">
+          {kind === "funny" ? "لینک با مزه" : "دعوت واقعی"}
+        </p>
+      )}
       {!result && (
       <form onSubmit={handleCreate} className="flex flex-col gap-3">
         <input
@@ -542,6 +601,7 @@ export default function CreateInvite({
             type="button"
             onClick={() => {
               setOpen(false);
+              setKind(null);
               setResult(null);
             }}
             className="rounded-full bg-zinc-200 px-6 py-3 font-bold transition hover:bg-zinc-300"
@@ -583,6 +643,7 @@ export default function CreateInvite({
               type="button"
               onClick={() => {
                 setResult(null);
+                setKind(null);
                 setOpen(false);
               }}
               className="w-full rounded-full bg-zinc-200 px-6 py-3 text-sm font-bold transition hover:bg-zinc-300"
