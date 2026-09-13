@@ -17,9 +17,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function DashboardNewInvitePage() {
+export default async function DashboardNewInvitePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ kind?: string }>;
+}) {
   const user = await requireUser();
   if (!user) redirect("/login");
+
+  const { kind: kindParam } = await searchParams;
+  const initialKind =
+    kindParam === "funny" || kindParam === "real" ? kindParam : null;
 
   const verified = await requireVerified();
   if (!verified) {
@@ -114,6 +122,7 @@ export default async function DashboardNewInvitePage() {
           }))}
           apiPath="/api/invites"
           defaultOpen
+          initialKind={initialKind}
           afterCreateHref="/dashboard"
           maxActive={planLimits?.max_active}
           maxMonthly={planLimits?.max_monthly_creates}

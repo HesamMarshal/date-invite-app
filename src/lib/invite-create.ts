@@ -13,7 +13,16 @@ import {
   countActiveOptionsByIds,
   listInviteOptions,
 } from "@/lib/option-queries";
-import type { InviteWindowFields } from "@/lib/invite-queries";
+import type { InviteKind, InviteWindowFields } from "@/lib/invite-queries";
+
+function parseInviteKind(value: unknown): InviteKind | "invalid" {
+  if (value == null || value === "") return "funny";
+  if (typeof value !== "string") return "invalid";
+  const kind = value.trim();
+  if (!kind) return "funny";
+  if (kind === "funny" || kind === "real") return kind;
+  return "invalid";
+}
 
 function parseOptionalDate(value: unknown): string | null | "invalid" {
   if (value == null || value === "") return null;
@@ -35,6 +44,7 @@ export type ParsedCreateInvite =
       ok: true;
       recipientName: string;
       inviteText: string;
+      kind: InviteKind;
       expiresAt: string | null;
       optionIds: number[];
       windows: InviteWindowFields;
@@ -48,6 +58,7 @@ export async function parseCreateInviteBody(
   const {
     recipientName,
     inviteText,
+    kind: kindRaw,
     expiresAt,
     optionIds,
     dateFrom,
@@ -55,6 +66,11 @@ export async function parseCreateInviteBody(
     timeFrom,
     timeTo,
   } = body;
+
+  const kind = parseInviteKind(kindRaw);
+  if (kind === "invalid") {
+    return { ok: false, error: "invalid_kind", status: 400 };
+  }
 
   if (!recipientName || typeof recipientName !== "string") {
     return { ok: false, error: "name_required", status: 400 };
@@ -143,6 +159,7 @@ export async function parseCreateInviteBody(
     ok: true,
     recipientName: recipientName.trim(),
     inviteText: normalizeInviteText(inviteText),
+    kind,
     expiresAt: parsedExpiry,
     optionIds: resolvedOptionIds,
     windows,

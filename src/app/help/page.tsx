@@ -140,13 +140,7 @@ export default function HelpPage() {
             ۳. ساخت لینک و کپی
           </h2>
           <ol className="list-decimal space-y-2 pr-5 text-sm leading-relaxed text-zinc-600">
-            <li>
-              تو داشبورد روی{" "}
-              <Link href="/dashboard/new" className="font-bold text-pink-600">
-                ساخت دعوت‌نامه جدید
-              </Link>{" "}
-              بزن.
-            </li>
+            <li>تو داشبورد یکی از دو نوع لینک رو انتخاب کن: لینک با مزه یا دعوت واقعی.</li>
             <li>اسم مهمون رو بنویس.</li>
             <li>اختیاری: متن دعوت، غذا، بازه تاریخ/ساعت، انقضا.</li>
             <li>بساز رو بزن.</li>
@@ -168,6 +162,10 @@ export default function HelpPage() {
             <li>اگر بله: تاریخ → ساعت → غذا.</li>
             <li>صفحهٔ تشکر؛ می‌تونه بعداً جواب رو عوض کنه.</li>
           </ol>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            تو «لینک با مزه» دکمهٔ نه شوخی می‌کنه و کوچیک می‌شه. تو «دعوت واقعی»
+            بله و نه هر دو جدی‌ان؛ نه یک تأیید می‌خواد و ثبت می‌شه.
+          </p>
           <p className="text-xs text-zinc-400">
             عکس‌های این بخش به‌زودی اضافه می‌شه.
           </p>

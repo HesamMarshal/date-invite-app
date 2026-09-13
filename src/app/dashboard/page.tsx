@@ -37,6 +37,11 @@ const STATUS_LABEL = {
   unseen: "🔗 باز نکرده",
 } as const;
 
+const KIND_LABEL = {
+  funny: "با مزه",
+  real: "واقعی",
+} as const;
+
 export default async function DashboardPage() {
   const user = await requireUser();
   if (!user) redirect("/login");
@@ -81,12 +86,27 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <Link
-        href="/dashboard/new"
-        className="rounded-2xl border-2 border-dashed border-zinc-300 px-6 py-4 text-center text-zinc-500 transition hover:border-pink-400 hover:text-pink-600"
-      >
-        + ساخت دعوت‌نامه جدید
-      </Link>
+      <div className="space-y-3">
+        <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>
+        <Link
+          href="/dashboard/new?kind=funny"
+          className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
+        >
+          <span className="block font-bold text-zinc-800">لینک با مزه</span>
+          <span className="mt-1 block text-sm text-zinc-500">
+            دکمه نه کوچیک می‌شه
+          </span>
+        </Link>
+        <Link
+          href="/dashboard/new?kind=real"
+          className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
+        >
+          <span className="block font-bold text-zinc-800">دعوت واقعی</span>
+          <span className="mt-1 block text-sm text-zinc-500">
+            بله و نه هر دو جدی‌ان
+          </span>
+        </Link>
+      </div>
 
       {dbError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
@@ -125,9 +145,14 @@ export default async function DashboardPage() {
               }`}
             >
               <div className="flex min-w-0 items-center justify-between gap-2">
-                <span className="min-w-0 truncate text-lg font-bold">
-                  {inv.recipient_name}
-                </span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="min-w-0 truncate text-lg font-bold">
+                    {inv.recipient_name}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
+                    {KIND_LABEL[inv.kind]}
+                  </span>
+                </div>
                 <span className="shrink-0 text-sm">{STATUS_LABEL[status]}</span>
               </div>
 

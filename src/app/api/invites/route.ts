@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
     parsed.expiresAt,
     parsed.optionIds,
     parsed.windows,
-    userId
+    userId,
+    parsed.kind
   );
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
