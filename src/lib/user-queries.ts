@@ -108,6 +108,21 @@ export async function listUsersWithStats(): Promise<UserWithStats[]> {
   }));
 }
 
+/** Host telegram_id for notify. No user / no telegram_id → null. */
+export async function getTelegramIdByUserId(
+  userId: number
+): Promise<number | null> {
+  const pool = getPool();
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT telegram_id FROM users WHERE id = ? LIMIT 1`,
+    [userId]
+  );
+  const id = rows[0]?.telegram_id;
+  if (id == null) return null;
+  const n = Number(id);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
 /** /start webhook: mark host as willing to receive bot DMs. Unknown telegram_id → false. */
 export async function markTelegramNotifyOk(
   telegramId: number

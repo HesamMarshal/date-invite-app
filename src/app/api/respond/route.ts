@@ -7,6 +7,7 @@ import {
   toDateOnly,
   toTimeHm,
 } from "@/lib/datetime";
+import { notifyHostOfResponse } from "@/lib/telegram-notify";
 
 /**
  * Guest respond — public token contract unchanged (plan 10-7).
@@ -90,6 +91,13 @@ export async function POST(request: NextRequest) {
 
   await upsertResponse(
     invite.id,
+    accepted,
+    accepted ? (selectedDatetime as string) : null,
+    accepted ? (foodChoice as string) : null
+  );
+
+  await notifyHostOfResponse(
+    invite,
     accepted,
     accepted ? (selectedDatetime as string) : null,
     accepted ? (foodChoice as string) : null
