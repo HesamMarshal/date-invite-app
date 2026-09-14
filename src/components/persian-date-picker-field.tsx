@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import DatePicker from "react-multi-date-picker";
-import type { DateObject } from "react-multi-date-picker";
+import DateObject from "react-date-object";
 import persian from "react-date-object/calendars/persian";
 import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
@@ -16,6 +16,12 @@ import {
 type MapDaysFn = NonNullable<
   React.ComponentProps<typeof DatePicker>["mapDays"]
 >;
+
+function toGregorianIso(date: DateObject): string {
+  return toAsciiDigits(
+    new DateObject(date).convert(gregorian).format("YYYY-MM-DD")
+  );
+}
 
 type Props = {
   label: string;
@@ -55,9 +61,7 @@ export default function PersianDatePickerField({
   const mapDays: MapDaysFn | undefined =
     minIso || maxIso
       ? ({ date }) => {
-          const g = toAsciiDigits(
-            (date as DateObject).convert(gregorian).format("YYYY-MM-DD")
-          );
+          const g = toGregorianIso(date as DateObject);
           if (minIso && g < minIso) return { disabled: true };
           if (maxIso && g > maxIso) return { disabled: true };
           return {};
@@ -83,8 +87,8 @@ export default function PersianDatePickerField({
       editable={false}
       calendarPosition="bottom-center"
       containerClassName={containerClassName}
-      minDate={minDate}
-      maxDate={maxDate}
+      minDate={persianLabelToPickerDate(minDate)}
+      maxDate={persianLabelToPickerDate(maxDate)}
       currentDate={currentDate}
       disableMonthPicker={hasWindow}
       disableYearPicker={hasWindow}
@@ -105,11 +109,9 @@ export default function PersianDatePickerField({
           onClear?.();
           return;
         }
-        const pickedLabel = value.format(persianDatePickerFormat);
-        const iso = toAsciiDigits(
-          value.convert(gregorian).format("YYYY-MM-DD")
-        );
-        onPick(pickedLabel, iso);
+        const picked = value as DateObject;
+        const pickedLabel = picked.format(persianDatePickerFormat);
+        onPick(pickedLabel, toGregorianIso(picked));
       }}
     />
   );
