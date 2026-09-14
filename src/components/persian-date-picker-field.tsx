@@ -8,6 +8,7 @@ import persianFa from "react-date-object/locales/persian_fa";
 import gregorian from "react-date-object/calendars/gregorian";
 import { toAsciiDigits } from "@/lib/datetime";
 import {
+  isoToPersianLabel,
   isoToPersianPickerLabel,
   persianDatePickerFormat,
   persianLabelToPickerDate,
@@ -17,10 +18,18 @@ type MapDaysFn = NonNullable<
   React.ComponentProps<typeof DatePicker>["mapDays"]
 >;
 
+function copyDate(date: DateObject): DateObject {
+  return new DateObject({
+    year: date.year,
+    month: date.month.number,
+    day: date.day,
+    calendar: date.calendar,
+    locale: date.locale,
+  });
+}
+
 function toGregorianIso(date: DateObject): string {
-  return toAsciiDigits(
-    new DateObject(date).convert(gregorian).format("YYYY-MM-DD")
-  );
+  return toAsciiDigits(copyDate(date).convert(gregorian).format("YYYY-MM-DD"));
 }
 
 type Props = {
@@ -110,8 +119,13 @@ export default function PersianDatePickerField({
           return;
         }
         const picked = value as DateObject;
-        const pickedLabel = picked.format(persianDatePickerFormat);
-        onPick(pickedLabel, toGregorianIso(picked));
+        const iso = toGregorianIso(picked);
+        const persianLabel = isoToPersianLabel(iso);
+        if (!persianLabel) {
+          onClear?.();
+          return;
+        }
+        onPick(persianLabel, iso);
       }}
     />
   );
