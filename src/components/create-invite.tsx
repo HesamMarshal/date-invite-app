@@ -638,7 +638,6 @@ export default function CreateInvite({
             />
             <CopyButton text={result.url} shareTitle="دعوت‌نامه بیا با من" />
           </div>
-          {botStartUrl ? <StartBotHint href={botStartUrl} /> : null}
           {afterCreateHref && (
             <button
               type="button"
@@ -663,6 +662,11 @@ export default function CreateInvite({
           )}
         </div>
       )}
+      {result && botStartUrl ? (
+        <div className="rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
+          <StartBotHint href={botStartUrl} />
+        </div>
+      ) : null}
     </div>
   );
 }

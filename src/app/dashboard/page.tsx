@@ -105,12 +105,6 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {botStartUrl ? (
-        <div className="rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
-          <StartBotHint href={botStartUrl} />
-        </div>
-      ) : null}
-
       {createBlocked ? (
         <div className="space-y-3">
           <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>
@@ -266,6 +260,12 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {botStartUrl ? (
+        <div className="rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
+          <StartBotHint href={botStartUrl} />
+        </div>
+      ) : null}
 
     </main>
   );
