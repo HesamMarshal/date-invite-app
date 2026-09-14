@@ -95,3 +95,8 @@ export function getTelegramBotUsername(): string | null {
   const u = process.env.TELEGRAM_BOT_USERNAME?.trim().replace(/^@/, "");
   return u || null;
 }
+
+export function getTelegramNotifyStartUrl(): string | null {
+  const u = getTelegramBotUsername();
+  return u ? `https://t.me/${u}?start=notify` : null;
+}
