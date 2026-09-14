@@ -108,6 +108,20 @@ export async function listUsersWithStats(): Promise<UserWithStats[]> {
   }));
 }
 
+/** /start webhook: mark host as willing to receive bot DMs. Unknown telegram_id → false. */
+export async function markTelegramNotifyOk(
+  telegramId: number
+): Promise<boolean> {
+  const pool = getPool();
+  const [result] = await pool.query<ResultSetHeader>(
+    `UPDATE users
+        SET telegram_notify_ok_at = NOW()
+      WHERE telegram_id = ?`,
+    [telegramId]
+  );
+  return result.affectedRows > 0;
+}
+
 export async function updateUserPlanTier(
   userId: number,
   planTier: string
