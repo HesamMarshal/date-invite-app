@@ -2,7 +2,11 @@ import { getInvitationsWithResponses } from "@/lib/invite-queries";
 import { listInviteOptions } from "@/lib/option-queries";
 import CreateInvite from "./create-invite";
 import CopyButton from "@/components/copy-button";
-import { toPersianDigits } from "@/lib/datetime";
+import {
+  formatTehranDateFa,
+  formatTehranTimeFa,
+  toPersianDigits,
+} from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -102,25 +106,8 @@ export default async function AdminPage() {
                 <div className="text-sm text-zinc-600 space-y-1">
                   {inv.selected_datetime && (
                     <>
-                      <p>
-                        📅{" "}
-                        {new Date(inv.selected_datetime).toLocaleDateString(
-                          "fa-IR",
-                          {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )}
-                      </p>
-                      <p>
-                        🕐{" "}
-                        {new Date(inv.selected_datetime).toLocaleTimeString(
-                          "fa-IR",
-                          { hour: "2-digit", minute: "2-digit" }
-                        )}
-                      </p>
+                      <p>📅 {formatTehranDateFa(inv.selected_datetime)}</p>
+                      <p>🕐 {formatTehranTimeFa(inv.selected_datetime)}</p>
                     </>
                   )}
                   {inv.food_choice && <p>🍽️ {inv.food_choice}</p>}

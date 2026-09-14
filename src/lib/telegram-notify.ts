@@ -1,6 +1,7 @@
 import type { Invitation } from "./invite-queries";
 import { sendTelegramMessage } from "./telegram-bot";
 import { getTelegramIdByUserId } from "./user-queries";
+import { formatTehranDateFa, formatTehranTimeFa } from "./datetime";
 
 function dashboardUrl(): string {
   const base = (process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir").replace(
@@ -10,24 +11,14 @@ function dashboardUrl(): string {
   return `${base}/dashboard`;
 }
 
-/** MySQL DATETIME is Tehran wall time. */
 function formatWhenFa(mysqlDatetime: string): string {
-  const m = mysqlDatetime.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/);
-  if (!m) return mysqlDatetime;
-  const d = new Date(`${m[1]}T${m[2]}:00+03:30`);
-  if (isNaN(d.getTime())) return mysqlDatetime;
-  const dateFa = d.toLocaleDateString("fa-IR", {
-    timeZone: "Asia/Tehran",
+  const dateFa = formatTehranDateFa(mysqlDatetime, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
-  const timeFa = d.toLocaleTimeString("fa-IR", {
-    timeZone: "Asia/Tehran",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  const timeFa = formatTehranTimeFa(mysqlDatetime);
+  if (!dateFa || !timeFa) return mysqlDatetime;
   return `${dateFa} ساعت ${timeFa}`;
 }
 

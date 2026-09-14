@@ -5,6 +5,8 @@ import {
   API_ERROR_FA,
   buildSelectedDatetime,
   clampMinutesToWindow,
+  formatTehranDateFa,
+  formatTehranTimeFa,
   timeToMinutes,
 } from "@/lib/datetime";
 import PersianDatePickerField from "@/components/persian-date-picker-field";
@@ -247,19 +249,13 @@ export default function InviteFlow({
             <div className="rounded-2xl bg-white p-5 shadow-sm space-y-2 text-zinc-600 animate-scale-in">
               <p>
                 📅{" "}
-                {new Date(existing.selectedDatetime).toLocaleDateString("fa-IR", {
+                {formatTehranDateFa(existing.selectedDatetime, {
                   weekday: "long",
                   month: "long",
                   day: "numeric",
                 })}
               </p>
-              <p>
-                🕐{" "}
-                {new Date(existing.selectedDatetime).toLocaleTimeString("fa-IR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
+              <p>🕐 {formatTehranTimeFa(existing.selectedDatetime)}</p>
               {existing.foodChoice && <p>🍽️ {existing.foodChoice}</p>}
             </div>
           )}

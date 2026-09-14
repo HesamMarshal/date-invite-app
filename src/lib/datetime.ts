@@ -87,6 +87,50 @@ export function buildSelectedDatetime(
   return `${d} ${hh}:${mm}:${ss}`;
 }
 
+const TEHRAN_TZ = "Asia/Tehran";
+
+/** MySQL DATETIME / mysql2 Date / ISO → instant (naive strings = Tehran wall time). */
+export function parseTehranMysqlDatetime(value: unknown): Date | null {
+  if (value == null || value === "") return null;
+  if (value instanceof Date) {
+    return isNaN(value.getTime()) ? null : value;
+  }
+  const s = toAsciiDigits(String(value)).trim();
+  if (/^\d{4}-\d{2}-\d{2}T/.test(s)) {
+    const iso = new Date(s);
+    return isNaN(iso.getTime()) ? null : iso;
+  }
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::(\d{2}))?/);
+  if (!m) return null;
+  const d = new Date(`${m[1]}T${m[2]}:${m[3] ?? "00"}+03:30`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+export function formatTehranDateFa(
+  value: unknown,
+  options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }
+): string | null {
+  const d = parseTehranMysqlDatetime(value);
+  if (!d) return null;
+  return d.toLocaleDateString("fa-IR", { ...options, timeZone: TEHRAN_TZ });
+}
+
+export function formatTehranTimeFa(value: unknown): string | null {
+  const d = parseTehranMysqlDatetime(value);
+  if (!d) return null;
+  return d.toLocaleTimeString("fa-IR", {
+    timeZone: TEHRAN_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export function isValidMysqlDatetime(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(value)) return false;
 

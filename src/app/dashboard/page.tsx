@@ -13,7 +13,11 @@ import {
 import CopyButton from "@/components/copy-button";
 import StartBotHint from "@/components/start-bot-hint";
 import InviteActiveToggle from "./invite-active-toggle";
-import { toPersianDigits } from "@/lib/datetime";
+import {
+  formatTehranDateFa,
+  formatTehranTimeFa,
+  toPersianDigits,
+} from "@/lib/datetime";
 import { getTelegramNotifyStartUrl } from "@/lib/telegram-auth";
 
 export const dynamic = "force-dynamic";
@@ -213,25 +217,8 @@ export default async function DashboardPage() {
                 <div className="space-y-1 text-sm text-zinc-600">
                   {inv.selected_datetime && (
                     <>
-                      <p>
-                        📅{" "}
-                        {new Date(inv.selected_datetime).toLocaleDateString(
-                          "fa-IR",
-                          {
-                            weekday: "long",
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )}
-                      </p>
-                      <p>
-                        🕐{" "}
-                        {new Date(inv.selected_datetime).toLocaleTimeString(
-                          "fa-IR",
-                          { hour: "2-digit", minute: "2-digit" }
-                        )}
-                      </p>
+                      <p>📅 {formatTehranDateFa(inv.selected_datetime)}</p>
+                      <p>🕐 {formatTehranTimeFa(inv.selected_datetime)}</p>
                     </>
                   )}
                   {inv.food_choice && <p>🍽️ {inv.food_choice}</p>}
