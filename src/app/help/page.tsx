@@ -149,6 +149,10 @@ export default function HelpPage() {
               تو داشبورد وضعیت جواب رو ببین؛ می‌تونی لینک رو فعال/غیرفعال کنی.
             </li>
           </ol>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            وقتی مهمون جواب بده، یک پیام تلگرام برات می‌آد — اول باید ربات را
+            استارت کنی.
+          </p>
           <p className="text-xs text-zinc-400">
             عکس‌های این بخش به‌زودی اضافه می‌شه.
           </p>

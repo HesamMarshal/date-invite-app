@@ -10,8 +10,10 @@ import {
   getPlanLimits,
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
+import StartBotHint from "@/components/start-bot-hint";
 import InviteActiveToggle from "./invite-active-toggle";
 import { toPersianDigits } from "@/lib/datetime";
+import { getTelegramNotifyStartUrl } from "@/lib/telegram-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +53,8 @@ export default async function DashboardPage() {
     (user.telegram_username ? `@${user.telegram_username}` : "کاربر");
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://biyabaman.ir";
+  const botStartUrl =
+    !user.telegram_notify_ok ? getTelegramNotifyStartUrl() : null;
 
   let invites: Awaited<ReturnType<typeof getInvitationsWithResponses>> = [];
   let activeCount = 0;
@@ -85,6 +89,12 @@ export default async function DashboardPage() {
           </p>
         )}
       </div>
+
+      {botStartUrl ? (
+        <div className="rounded-2xl border border-pink-200 bg-pink-50 px-4 py-3">
+          <StartBotHint href={botStartUrl} />
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>

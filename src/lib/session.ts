@@ -17,6 +17,7 @@ export type SessionUser = {
   display_name: string | null;
   is_admin: boolean;
   plan_tier: string;
+  telegram_notify_ok: boolean;
 };
 
 function newSessionId(): string {
@@ -74,7 +75,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const pool = getPool();
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT u.id, u.email, u.phone, u.telegram_id, u.telegram_username,
-            u.display_name, u.is_admin, u.plan_tier
+            u.display_name, u.is_admin, u.plan_tier, u.telegram_notify_ok_at
        FROM sessions s
        INNER JOIN users u ON u.id = s.user_id
       WHERE s.id = ?
@@ -95,6 +96,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     display_name: row.display_name ?? null,
     is_admin: !!row.is_admin,
     plan_tier: String(row.plan_tier || "free"),
+    telegram_notify_ok: row.telegram_notify_ok_at != null,
   };
 }
 

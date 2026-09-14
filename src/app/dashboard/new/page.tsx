@@ -9,6 +9,7 @@ import {
   getPlanLimits,
 } from "@/lib/plan-limits";
 import CreateInvite from "@/components/create-invite";
+import { getTelegramNotifyStartUrl } from "@/lib/telegram-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,7 @@ export default async function DashboardNewInvitePage({
           afterCreateHref="/dashboard"
           maxActive={planLimits?.max_active}
           maxMonthly={planLimits?.max_monthly_creates}
+          botStartUrl={getTelegramNotifyStartUrl()}
         />
       )}
     </main>

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import PersianDatePickerField from "@/components/persian-date-picker-field";
 import CopyButton from "@/components/copy-button";
+import StartBotHint from "@/components/start-bot-hint";
 import { DEFAULT_INVITE_TEXT } from "@/lib/invite-defaults";
 import { buildSelectedDatetime } from "@/lib/datetime";
 import {
@@ -127,6 +128,7 @@ export default function CreateInvite({
   maxActive,
   maxMonthly,
   initialKind = null,
+  botStartUrl = null,
 }: {
   activeOptions: OptionItem[];
   apiPath?: string;
@@ -138,6 +140,8 @@ export default function CreateInvite({
   maxMonthly?: number;
   /** Skip type picker when set from `/dashboard/new?kind=`. */
   initialKind?: InviteKind | null;
+  /** After create: «ربات را استارت کن» (Q4). Hidden if null. */
+  botStartUrl?: string | null;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const [kind, setKind] = useState<InviteKind | null>(initialKind);
@@ -634,6 +638,7 @@ export default function CreateInvite({
             />
             <CopyButton text={result.url} shareTitle="دعوت‌نامه بیا با من" />
           </div>
+          {botStartUrl ? <StartBotHint href={botStartUrl} /> : null}
           {afterCreateHref && (
             <button
               type="button"
