@@ -42,7 +42,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   // Reactivating counts toward active cap (monthly create is not checked).
-  if (isActive && !invite.is_active && !user.is_admin) {
+  if (isActive && !invite.is_active) {
     const [limits, active] = await Promise.all([
       getPlanLimits(user.plan_tier),
       countActiveInvitesForUser(user.id),

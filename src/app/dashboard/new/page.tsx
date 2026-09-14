@@ -71,7 +71,7 @@ export default async function DashboardNewInvitePage({
     dbError = true;
   }
 
-  if (!dbError && limitError && !verified.is_admin) {
+  if (!dbError && limitError) {
     redirect("/dashboard");
   }
 

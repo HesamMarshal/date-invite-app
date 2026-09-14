@@ -6,8 +6,7 @@ import { checkCreateLimits } from "@/lib/plan-limits";
 
 /**
  * Create invite (user-scoped).
- * - Verified Telegram user → `user_id` = session user; caps from `plan_types`
- * - Super-admin (`is_admin`) → skip quota
+ * Caps from `plan_types` apply to every account, including admin.
  */
 export async function POST(request: NextRequest) {
   const verified = await requireVerified();
@@ -19,13 +18,10 @@ export async function POST(request: NextRequest) {
 
   const user = verified ?? admin!;
   const userId = user.id;
-  const skipLimits = !!user.is_admin;
 
-  if (!skipLimits) {
-    const limits = await checkCreateLimits(userId, user.plan_tier);
-    if (!limits.ok) {
-      return NextResponse.json({ error: limits.error }, { status: 403 });
-    }
+  const limits = await checkCreateLimits(userId, user.plan_tier);
+  if (!limits.ok) {
+    return NextResponse.json({ error: limits.error }, { status: 403 });
   }
 
   let body: Record<string, unknown>;

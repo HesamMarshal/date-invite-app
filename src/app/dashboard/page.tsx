@@ -80,13 +80,11 @@ export default async function DashboardPage() {
   const atActiveCap =
     !!planLimits &&
     !dbError &&
-    !user.is_admin &&
     !isUnlimitedCap(planLimits.max_active) &&
     activeCount >= planLimits.max_active;
   const atMonthlyCap =
     !!planLimits &&
     !dbError &&
-    !user.is_admin &&
     !isUnlimitedCap(planLimits.max_monthly_creates) &&
     monthlyCount >= planLimits.max_monthly_creates;
   const createBlocked = atActiveCap || atMonthlyCap;
