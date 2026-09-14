@@ -306,8 +306,8 @@ export default function CreateInvite({
         setInviteText("");
         resetWindows();
         setSelectedIds(defaultSelectedIds(activeOptions));
-        router.refresh();
-        // Stay on success screen so user can copy/share (dashboard: no auto-redirect)
+        // Stay on success screen so user can copy/share. Do not refresh —
+        // hitting the active cap would remount this page as the limit error.
       } else {
         setError(errorFa[data.error] || data.error || "خطایی رخ داد");
       }

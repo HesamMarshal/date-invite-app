@@ -71,6 +71,10 @@ export default async function DashboardNewInvitePage({
     dbError = true;
   }
 
+  if (!dbError && limitError && !verified.is_admin) {
+    redirect("/dashboard");
+  }
+
   return (
     <main
       className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-6 overflow-x-clip p-6"
@@ -86,7 +90,7 @@ export default async function DashboardNewInvitePage({
         <h1 className="text-lg font-bold">دعوت‌نامه جدید</h1>
       </div>
 
-      {planLimits && !limitError && (
+      {planLimits && (
         <p className="text-center text-xs text-zinc-400">
           تا {formatPlanCapFa(planLimits.max_active)} فعال و{" "}
           {formatPlanCapFa(planLimits.max_monthly_creates)} ساخت در ماه
@@ -99,22 +103,7 @@ export default async function DashboardNewInvitePage({
         </div>
       )}
 
-      {limitError === "limit_active" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          حداکثر {planLimits ? formatPlanCapFa(planLimits.max_active) : "—"}{" "}
-          دعوت‌نامه فعال داری. یکی رو غیرفعال کن یا صبر کن تا منقضی بشه.
-        </div>
-      )}
-
-      {limitError === "limit_monthly" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
-          این ماه{" "}
-          {planLimits ? formatPlanCapFa(planLimits.max_monthly_creates) : "—"}{" "}
-          دعوت‌نامه ساختی. ماه بعد دوباره امتحان کن.
-        </div>
-      )}
-
-      {!dbError && !limitError && (
+      {!dbError && (
         <CreateInvite
           activeOptions={activeOptions.map((o) => ({
             id: o.id,

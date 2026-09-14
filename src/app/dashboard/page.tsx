@@ -8,6 +8,7 @@ import {
   countMonthlyCreatesForUser,
   formatPlanCapFa,
   getPlanLimits,
+  isUnlimitedCap,
 } from "@/lib/plan-limits";
 import CopyButton from "@/components/copy-button";
 import StartBotHint from "@/components/start-bot-hint";
@@ -72,6 +73,20 @@ export default async function DashboardPage() {
     dbError = true;
   }
 
+  const atActiveCap =
+    !!planLimits &&
+    !dbError &&
+    !user.is_admin &&
+    !isUnlimitedCap(planLimits.max_active) &&
+    activeCount >= planLimits.max_active;
+  const atMonthlyCap =
+    !!planLimits &&
+    !dbError &&
+    !user.is_admin &&
+    !isUnlimitedCap(planLimits.max_monthly_creates) &&
+    monthlyCount >= planLimits.max_monthly_creates;
+  const createBlocked = atActiveCap || atMonthlyCap;
+
   return (
     <main
       className="mx-auto flex min-h-screen w-full min-w-0 max-w-lg flex-col gap-8 overflow-x-clip p-6"
@@ -96,27 +111,45 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="space-y-3">
-        <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>
-        <Link
-          href="/dashboard/new?kind=funny"
-          className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
-        >
-          <span className="block font-bold text-zinc-800">لینک با مزه</span>
-          <span className="mt-1 block text-sm text-zinc-500">
-            دکمه نه کوچیک می‌شه
-          </span>
-        </Link>
-        <Link
-          href="/dashboard/new?kind=real"
-          className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
-        >
-          <span className="block font-bold text-zinc-800">دعوت واقعی</span>
-          <span className="mt-1 block text-sm text-zinc-500">
-            بله و نه هر دو جدی‌ان
-          </span>
-        </Link>
-      </div>
+      {createBlocked ? (
+        <div className="space-y-3">
+          <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>
+          {atActiveCap && planLimits && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
+              حداکثر {formatPlanCapFa(planLimits.max_active)} دعوت‌نامه فعال
+              داری. یکی رو غیرفعال کن یا صبر کن تا منقضی بشه.
+            </div>
+          )}
+          {atMonthlyCap && planLimits && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center text-sm text-amber-800">
+              این ماه {formatPlanCapFa(planLimits.max_monthly_creates)} دعوت‌نامه
+              ساختی. ماه بعد دوباره امتحان کن.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-sm font-bold text-zinc-700">ساخت دعوت‌نامه جدید</p>
+          <Link
+            href="/dashboard/new?kind=funny"
+            className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
+          >
+            <span className="block font-bold text-zinc-800">لینک با مزه</span>
+            <span className="mt-1 block text-sm text-zinc-500">
+              دکمه نه کوچیک می‌شه
+            </span>
+          </Link>
+          <Link
+            href="/dashboard/new?kind=real"
+            className="block rounded-2xl border-2 border-zinc-200 bg-white px-4 py-4 text-right transition hover:border-pink-400 hover:bg-pink-50"
+          >
+            <span className="block font-bold text-zinc-800">دعوت واقعی</span>
+            <span className="mt-1 block text-sm text-zinc-500">
+              بله و نه هر دو جدی‌ان
+            </span>
+          </Link>
+        </div>
+      )}
 
       {dbError && (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
