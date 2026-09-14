@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import {
   getInvitationByToken,
-  recordOpen,
   getResponseByInvitationId,
 } from "@/lib/invite-queries";
 import { getOptionsForInvitation } from "@/lib/option-queries";
@@ -13,6 +12,8 @@ import InviteFlow from "./invite-flow";
 type Props = {
   params: Promise<{ token: string }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function InvitePage({ params }: Props) {
   const { token } = await params;
@@ -53,8 +54,6 @@ export default async function InvitePage({ params }: Props) {
       </main>
     );
   }
-
-  await recordOpen(invite.id);
 
   const [existing, foodOptions] = await Promise.all([
     getResponseByInvitationId(invite.id),

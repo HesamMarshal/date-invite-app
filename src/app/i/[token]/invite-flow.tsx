@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   API_ERROR_FA,
   buildSelectedDatetime,
@@ -159,6 +159,7 @@ export default function InviteFlow({
   const [minute, setMinute] = useState(() => initialTimeParts(windows).minute);
   const [food, setFood] = useState("");
   const [error, setError] = useState("");
+  const recordedAskOpen = useRef(false);
   const time = formatTime(hour, minute);
   const timeLabel = time;
   const noLabels = [
@@ -167,6 +168,18 @@ export default function InviteFlow({
     "🥺 نه",
     "🙈 نه",
   ] as const;
+
+  useEffect(() => {
+    if (recordedAskOpen.current) return;
+    if (existing?.accepted) return;
+    if (step !== "ask") return;
+    recordedAskOpen.current = true;
+    void fetch("/api/open", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    }).catch(() => {});
+  }, [step, token, existing?.accepted]);
 
   const minMinutes = windows.timeFrom
     ? timeToMinutes(windows.timeFrom) ?? 0
